@@ -24,14 +24,21 @@
 - **Bilgi yoğunluğu** maksimizasyonu
 - **Aşamalı başarı** metrikleri
 
+### 🚀 Yeni Özellikler
+- **🤖 AI Otomatik Form Doldurma**: Proje açıklamasından otomatik form doldurma
+- **📋 Proje Template'leri**: Popüler proje türleri için hazır template'ler
+- **🔄 Session Yönetimi**: Büyük veriler için optimize edilmiş session sistemi
+- **📱 Modern Web Arayüzü**: Bootstrap 5 ile responsive tasarım
+- **💾 Çoklu Format Desteği**: Markdown, JSON, TXT formatlarında export
+
 ## 🚀 Hızlı Başlangıç
 
 ### 1. Kurulum
 
 ```bash
 # Repository'yi klonlayın
-git clone https://github.com/your-username/context-engineering-prp-generator.git
-cd context-engineering-prp-generator
+git clone https://github.com/umutondersu/context_creator.git
+cd context_creator
 
 # Sanal ortam oluşturun
 python -m venv venv
@@ -74,6 +81,11 @@ DEEPSEEK_API_KEY=sk-your-deepseek-api-key-here
 
 # Default LLM Provider
 DEFAULT_LLM_PROVIDER=openai
+
+# Flask Configuration
+FLASK_DEBUG=True
+FLASK_HOST=0.0.0.0
+FLASK_PORT=5000
 ```
 
 ### 3. Uygulamayı Çalıştırın
@@ -86,38 +98,45 @@ Tarayıcınızda `http://localhost:5000` adresine gidin.
 
 ## 📋 Kullanım
 
-### 1. Proje Kurulumu
+### 1. Template Seçimi
+- Ana sayfada popüler proje türlerinden birini seçin
+- Veya sıfırdan başlamayı tercih edin
+
+### 2. Proje Kurulumu
 - Proje adı, türü ve temel bilgileri girin
+- AI ile otomatik form doldurma özelliğini kullanın
 - Programlama dili ve hedef platformları seçin
 - Ekip büyüklüğü ve hedef süreyi belirtin
 
-### 2. Gereksinim Toplama
+### 3. Gereksinim Toplama
 - Fonksiyonel gereksinimleri detaylandırın
 - Teknik gereksinimleri (framework, veritabanı, vb.) belirtin
 - Kullanıcı hikayelerini ekleyin
 - Kısıtlamaları ve özel gereksinimleri tanımlayın
 
-### 3. AI Ekip Analizi
-- Sistem Analisti projeyi değerlendirir
-- Yazılım Mimarı mimari tasarımı oluşturur
-- Test Uzmanı test stratejisini planlar
-- Dokümantasyon Uzmanı PRP'yi üretir
+### 4. PRP Üretimi
+- Detay seviyesini seçin (Temel, Detaylı, Kapsamlı)
+- AI ekibi projenizi analiz eder
+- Sample PRP formatında eksiksiz dokümantasyon üretilir
 
-### 4. Sonuç ve Export
+### 5. Sonuç ve Export
 - Oluşturulan PRP'yi önizleyin
 - Markdown, JSON veya TXT formatında indirin
 - Kalite metriklerini inceleyin
+- E-posta ile paylaşın
 
 ## 🏗️ Proje Yapısı
 
 ```
-context-engineering-prp-generator/
+context_creator/
 ├── flask_app.py                   # Ana Flask uygulaması
 ├── requirements.txt               # Python bağımlılıkları
 ├── .env.example                  # Environment variables örneği
+├── .gitignore                    # Git ignore dosyası
 ├── INITIAL.md                    # Context Engineering tanımı
 ├── CLAUDE.md                     # Proje kuralları
 ├── README.md                     # Bu dosya
+├── LICENSE                       # MIT lisansı
 │
 ├── templates/                    # Flask HTML template'leri
 │   ├── base.html                 # Temel layout
@@ -160,9 +179,11 @@ context-engineering-prp-generator/
 │   └── test_basic.py             # Temel testler
 │
 ├── examples/                     # Örnek dosyalar
+│   └── sample_prp.md             # Örnek PRP dosyası
 ├── logs/                         # Log dosyaları
 ├── output/                       # Üretilen PRP dosyaları
 └── temp/                         # Geçici dosyalar ve session'lar
+    └── sessions/                 # Flask session dosyaları
 ```
 
 ## 🧪 Testler
@@ -189,6 +210,9 @@ python tests/test_basic.py
 | `OPENROUTER_API_KEY` | OpenRouter API anahtarı | - |
 | `DEEPSEEK_API_KEY` | DeepSeek API anahtarı | - |
 | `DEFAULT_LLM_PROVIDER` | Varsayılan LLM provider | `openai` |
+| `FLASK_DEBUG` | Flask debug modu | `True` |
+| `FLASK_HOST` | Flask host adresi | `0.0.0.0` |
+| `FLASK_PORT` | Flask port numarası | `5000` |
 | `LOG_LEVEL` | Log seviyesi | `INFO` |
 | `TEST_MODE` | Test modu | `false` |
 
@@ -230,13 +254,42 @@ Context Engineering, geleneksel "prompt engineering"den çok daha kapsamlı bir 
 4. **Progressive Success**: Aşamalı başarı
 5. **AI Tool Compatibility**: Tüm AI araçları ile uyumlu
 
+## 🔧 Teknik Özellikler
+
+### Flask Web Framework
+- **Modern Bootstrap 5 arayüzü**
+- **Responsive tasarım** (mobil uyumlu)
+- **AJAX tabanlı** form işlemleri
+- **Real-time progress** göstergeleri
+
+### Session Yönetimi
+- **Flask-Session** ile sunucu tarafında session
+- **Geçici dosya sistemi** ile büyük veri yönetimi
+- **Otomatik temizleme** mekanizması
+- **Cookie boyutu optimizasyonu**
+
+### AI Agent Sistemi
+- **Multi-agent koordinasyon**
+- **Pydantic AI** framework
+- **Async/await** pattern'leri
+- **Error handling** ve retry logic
+
 ## 🤝 Katkıda Bulunma
 
 1. Repository'yi fork edin
 2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Değişikliklerinizi commit edin (`git commit -m 'Add amazing feature'`)
+3. Değişikliklerinizi commit edin (`git commit -m 'feat: Add amazing feature'`)
 4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
 5. Pull Request oluşturun
+
+### Commit Standartları
+Conventional Commits formatını kullanın:
+- `feat:` - Yeni özellik
+- `fix:` - Bug düzeltmesi
+- `docs:` - Dokümantasyon değişikliği
+- `style:` - Kod formatı (logic değişikliği yok)
+- `refactor:` - Kod refactoring
+- `test:` - Test ekleme/düzeltme
 
 ## 📝 Lisans
 
@@ -247,6 +300,7 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için `LICENSE` dosy
 - [Context Engineering Community](https://github.com/coleam00/context-engineering-intro) - Temel metodoloji
 - [Pydantic AI](https://github.com/pydantic/pydantic-ai) - AI agent framework
 - [Flask](https://flask.palletsprojects.com/) - Web app framework
+- [Bootstrap](https://getbootstrap.com/) - UI framework
 
 ## 📞 Destek
 
@@ -256,7 +310,16 @@ Sorularınız veya sorunlarınız için:
 - Dokümantasyonu inceleyin
 - Community Discord'a katılın
 
+## 🚀 Roadmap
+
+### v2.0 Planları
+- [ ] Real-time collaboration
+- [ ] Project versioning
+- [ ] Advanced AI models integration
+- [ ] Custom template builder
+- [ ] API endpoint'leri
+- [ ] Docker containerization
+
 ---
 
-**Context Engineering ile yazılım geliştirme sürecinizi devrim niteliğinde değiştirin! 🚀** #   c o n t e x t _ C r e a t o r  
- 
+**Context Engineering ile yazılım geliştirme sürecinizi devrim niteliğinde değiştirin! 🚀**
