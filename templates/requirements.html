@@ -9,6 +9,15 @@
         <p class="text-muted mb-0">Projenizin detaylı gereksinimlerini belirleyin</p>
     </div>
     <div class="card-body">
+        <!-- Template Info -->
+        {% if session.selected_template %}
+        <div class="alert alert-success">
+            <h5><i class="fas fa-check-circle me-2"></i>{{ templates[session.selected_template].title }} Template Gereksinimleri</h5>
+            <p class="mb-2">Seçilen template'in gereksinimleri otomatik olarak doldurulmuştur.</p>
+            <p class="mb-0"><strong>İstediğiniz alanları düzenleyebilir veya AI ile yeniden doldurabilirsiniz.</strong></p>
+        </div>
+        {% endif %}
+
         <!-- AI Helper -->
         <div class="ai-helper">
             <h5><i class="fas fa-robot me-2"></i>AI Yardımcısı</h5>
@@ -137,8 +146,28 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Template requirements verilerini JavaScript'e aktar -->
+{% if template_requirements %}
+<script id="template-requirements" type="application/json">{{ template_requirements|tojson|safe }}</script>
+{% endif %}
+
+<!-- Proje verilerini JavaScript'e aktar -->
+<script id="project-data" type="application/json">{{ project_data|tojson|safe }}</script>
+
 <script>
 $(document).ready(function() {
+    // Proje verilerini global değişkene yükle
+    const projectDataElement = document.getElementById('project-data');
+    if (projectDataElement) {
+        window.projectData = JSON.parse(projectDataElement.textContent);
+    }
+    
+    // Template'den gelen gereksinimleri form'a doldur
+    const templateRequirementsElement = document.getElementById('template-requirements');
+    if (templateRequirementsElement) {
+        const templateRequirements = JSON.parse(templateRequirementsElement.textContent);
+        fillFormWithTemplateRequirements(templateRequirements);
+    }
     // AI ile gereksinimleri doldur
     $('#aiRequirementsBtn').click(function() {
         const btn = $(this);
@@ -237,6 +266,82 @@ $(document).ready(function() {
             showAlert('danger', 'Form gönderme hatası: ' + error);
         });
     });
+    
+    // Template gereksinimlerini form'a doldur
+    function fillFormWithTemplateRequirements(templateRequirements) {
+        // Fonksiyonel gereksinimler
+        if (templateRequirements.functional_requirements) {
+            const functionalReqs = Array.isArray(templateRequirements.functional_requirements) 
+                ? templateRequirements.functional_requirements.join('\n') 
+                : templateRequirements.functional_requirements;
+            $('#functional_requirements').val(functionalReqs);
+        }
+        
+        // Fonksiyonel olmayan gereksinimler
+        if (templateRequirements.non_functional_requirements) {
+            const nonFunctionalReqs = Array.isArray(templateRequirements.non_functional_requirements) 
+                ? templateRequirements.non_functional_requirements.join('\n') 
+                : templateRequirements.non_functional_requirements;
+            $('#non_functional_requirements').val(nonFunctionalReqs);
+        }
+        
+        // Teknik gereksinimler
+        if (templateRequirements.technical_requirements) {
+            const technicalReqs = Array.isArray(templateRequirements.technical_requirements) 
+                ? templateRequirements.technical_requirements.join('\n') 
+                : templateRequirements.technical_requirements;
+            $('#technical_constraints').val(technicalReqs);
+        }
+        
+        // Kısıtlamalar
+        if (templateRequirements.constraints) {
+            const constraints = Array.isArray(templateRequirements.constraints) 
+                ? templateRequirements.constraints.join('\n') 
+                : templateRequirements.constraints;
+            $('#technical_constraints').val($('#technical_constraints').val() + '\n' + constraints);
+        }
+        
+        // Kabul kriterleri (template'de genellikle olmaz, varsayılan değerler)
+        if (!$('#acceptance_criteria').val()) {
+            $('#acceptance_criteria').val('Tüm fonksiyonel gereksinimler karşılanmalı\nPerformans testleri başarılı olmalı\nGüvenlik testleri geçilmeli\nKod kalitesi standartları karşılanmalı');
+        }
+        
+        // Kullanıcı hikayeleri (template'den çıkarılabilir)
+        if (!$('#user_stories').val()) {
+            // Fonksiyonel gereksinimlerden basit kullanıcı hikayeleri oluştur
+            const functionalReqs = templateRequirements.functional_requirements || [];
+            const userStories = functionalReqs.map(req => 
+                `Bir kullanıcı olarak, ${req.toLowerCase()} istiyorum`
+            ).join('\n');
+            $('#user_stories').val(userStories);
+        }
+        
+        // Bağımlılıklar (tech stack'den çıkar)
+        if (!$('#dependencies').val()) {
+            // Proje verilerinden tech stack'i al
+            const projectData = window.projectData || {};
+            const techStack = projectData.tech_stack || [];
+            if (techStack.length > 0) {
+                const dependencies = techStack.map(tech => {
+                    if (tech.toLowerCase().includes('react')) return `${tech} - Frontend framework`;
+                    if (tech.toLowerCase().includes('node')) return `${tech} - Backend runtime`;
+                    if (tech.toLowerCase().includes('typescript')) return `${tech} - Type safety`;
+                    if (tech.toLowerCase().includes('tailwind')) return `${tech} - CSS framework`;
+                    if (tech.toLowerCase().includes('storage')) return `${tech} - Data persistence`;
+                    if (tech.toLowerCase().includes('api')) return `${tech} - External service`;
+                    return `${tech} - Ana teknoloji`;
+                }).join('\n');
+                $('#dependencies').val(dependencies);
+            }
+        }
+        
+        // Riskler (genel riskler)
+        if (!$('#risks').val()) {
+            $('#risks').val('Teknoloji değişiklikleri\nPerformans sorunları\nGüvenlik açıkları\nZaman kısıtlamaları\nBütçe aşımları');
+        }
+        
+        console.log('Template gereksinimleri form alanlarına dolduruldu');
+    }
 });
 </script>
 {% endblock %} 

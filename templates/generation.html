@@ -19,8 +19,18 @@
                     <div class="card-body">
                         <p><strong>Proje Adı:</strong> {{ session.project_data.project_name or 'Belirtilmemiş' }}</p>
                         <p><strong>Proje Türü:</strong> {{ session.project_data.project_type or 'Belirtilmemiş' }}</p>
-                        <p><strong>Teknoloji Stack:</strong> {{ session.project_data.tech_stack or 'Belirtilmemiş' }}</p>
-                        <p><strong>Hedef Platform:</strong> {{ session.project_data.target_platform or 'Belirtilmemiş' }}</p>
+                        <p><strong>Teknoloji Stack:</strong> 
+                            {% if session.project_data.tech_stack %}
+                                {% if session.project_data.tech_stack is string %}
+                                    {{ session.project_data.tech_stack }}
+                                {% else %}
+                                    {{ session.project_data.tech_stack|join(', ') }}
+                                {% endif %}
+                            {% else %}
+                                Belirtilmemiş
+                            {% endif %}
+                        </p>
+                        <p><strong>Hedef Platform:</strong> {{ session.project_data.deployment_target or 'Belirtilmemiş' }}</p>
                     </div>
                 </div>
             </div>

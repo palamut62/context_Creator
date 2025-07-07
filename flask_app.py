@@ -223,7 +223,8 @@ def requirements():
     return render_template('requirements.html',
                          project_data=session['project_data'],
                          template_requirements=template_requirements,
-                         ai_requirements=ai_requirements)
+                         ai_requirements=ai_requirements,
+                         templates=templates)
 
 @app.route('/generation')
 def generation():
@@ -410,10 +411,10 @@ def save_project():
             "6+ ay": Timeline.LONG_TERM
         }
         
-        # ProjectData oluştur
+        # ProjectData oluştur - tutarlı field isimleri kullan
         project_data = {
-            'name': data.get('project_name'),
-            'type': data.get('project_type'),
+            'project_name': data.get('project_name'),
+            'project_type': data.get('project_type'),
             'description': data.get('description'),
             'target_audience': data.get('target_audience'),
             'timeline': data.get('timeline'),
@@ -471,8 +472,8 @@ def generate_prp():
             return jsonify({'error': 'Proje verileri eksik'}), 400
         
         # Proje verilerini al
-        project_data = session['project_data']
-        requirements = session['project_requirements']
+        session_project_data = session['project_data']
+        session_requirements = session['project_requirements']
         
         # Üretim ayarlarını al
         data = request.get_json() or {}
@@ -487,6 +488,36 @@ def generate_prp():
         # PRP Generator agent'ı oluştur
         prp_generator = PRPGeneratorAgent(llm_client, logger)
         
+        # Proje verilerini PRP Generator için uygun formata çevir
+        # Hem eski hem yeni format için uyumluluk sağla
+        project_data = {
+            'project_name': session_project_data.get('project_name') or session_project_data.get('name'),
+            'project_type': session_project_data.get('project_type') or session_project_data.get('type'),
+            'description': session_project_data.get('description'),
+            'tech_stack': session_project_data.get('tech_stack', []),
+            'target_platform': session_project_data.get('deployment_target'),
+            'timeline': session_project_data.get('timeline'),
+            'main_goals': session_project_data.get('main_goals'),
+            'target_audience': session_project_data.get('target_audience'),
+            'budget_range': session_project_data.get('budget_range'),
+            'detail_level': detail_level,
+            'include_examples': include_examples
+        }
+        
+        # Requirements'ı da uygun formata çevir
+        # Önce AI ile doldurulmuş verileri kontrol et, sonra manuel girilenleri
+        ai_requirements = session.get('ai_filled_requirements', {})
+        
+        requirements = {
+            'functional_requirements': session_requirements.get('functional_requirements') or ai_requirements.get('functional_requirements', ''),
+            'non_functional_requirements': session_requirements.get('non_functional_requirements') or ai_requirements.get('non_functional_requirements', ''),
+            'technical_constraints': session_requirements.get('technical_constraints') or ai_requirements.get('technical_constraints', ''),
+            'acceptance_criteria': session_requirements.get('acceptance_criteria') or ai_requirements.get('acceptance_criteria', ''),
+            'user_stories': session_requirements.get('user_stories') or ai_requirements.get('user_stories', ''),
+            'dependencies': session_requirements.get('dependencies') or ai_requirements.get('dependencies', ''),
+            'risks': session_requirements.get('risks') or ai_requirements.get('risks', '')
+        }
+        
         # Detay seviyesine göre proje verilerini zenginleştir
         if detail_level == 'comprehensive':
             # Kapsamlı detaylar ekle
@@ -496,9 +527,6 @@ def generate_prp():
         elif detail_level == 'basic':
             # Temel bilgiler yeterli
             project_data['simplified'] = True
-        
-        project_data['detail_level'] = detail_level
-        project_data['include_examples'] = include_examples
         
         # Async fonksiyonu çalıştır
         prp_content = asyncio.run(
