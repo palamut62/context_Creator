@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Ana Sayfa - Context Engineering PRP Generator{% endblock %}
+
+{% block content %}
+<!-- Main Header -->
+<div class="main-header">
+    <h1><i class="fas fa-robot me-3"></i>Context Engineering PRP Generator'a Hoş Geldiniz!</h1>
+    <p class="lead">Yazılım geliştirme projeleriniz için AI destekli PRP dosyaları oluşturun</p>
+</div>
+
+<!-- Features Section -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="feature-card">
+            <h4><i class="fas fa-magic me-2"></i>Özellikler</h4>
+            <ul>
+                <li><strong>🤖 Multi-LLM Desteği:</strong> OpenAI, Gemini, Claude, OpenRouter, DeepSeek</li>
+                <li><strong>👥 AI Yazılım Ekibi:</strong> Sistem Analisti, Mimar, Test Uzmanı, Dokümantasyon Uzmanı</li>
+                <li><strong>📋 Kapsamlı Analiz:</strong> Proje gereksinimlerini detaylı şekilde toplar</li>
+                <li><strong>🎯 Context Engineering:</strong> Tüm AI kod geliştirme araçları ile uyumlu</li>
+                <li><strong>📊 Kalite Kontrolü:</strong> Üretilen PRP'lerin otomatik doğrulaması</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="feature-card">
+            <h4><i class="fas fa-cogs me-2"></i>Nasıl Çalışır?</h4>
+            <ol>
+                <li><strong>Proje Kurulumu:</strong> Temel proje bilgilerini girin</li>
+                <li><strong>Gereksinim Toplama:</strong> Detaylı gereksinimlerinizi belirtin</li>
+                <li><strong>AI Ekip Analizi:</strong> Uzman ajanlar projenizi analiz eder</li>
+                <li><strong>PRP Üretimi:</strong> Context Engineering standartlarında PRP oluşturulur</li>
+                <li><strong>Sonuç ve Export:</strong> PRP'nizi indirin ve kullanın</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<!-- Template Selection -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-templates me-2"></i>Hızlı Başlangıç Template'leri</h5>
+        <p class="mb-0 text-muted">Popüler proje türleri için hazır template'lerden birini seçin:</p>
+    </div>
+    <div class="card-body">
+        <div class="row" id="templateCards">
+            {% for template_id, template_data in templates.items() %}
+            <div class="col-md-6 mb-3">
+                <div class="card template-card" data-template="{{ template_id }}">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            {{ template_data.icon }} {{ template_data.title }}
+                        </h6>
+                        <p class="card-text">{{ template_data.description }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>{{ template_data.estimated_time }}
+                            </small>
+                            <small class="text-muted">
+                                <i class="fas fa-layer-group me-1"></i>{{ template_data.complexity }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-3">
+            <button class="btn btn-outline-primary me-2" id="clearTemplate">
+                <i class="fas fa-times me-2"></i>Template Seçimini Temizle
+            </button>
+            <button class="btn btn-primary" id="useTemplate" disabled>
+                <i class="fas fa-check me-2"></i>Seçili Template ile Devam Et
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Start Without Template -->
+<div class="text-center">
+    <h5 class="mb-3">Veya Template Kullanmadan Başlayın</h5>
+    <a href="/project-setup" class="btn btn-outline-primary btn-lg">
+        <i class="fas fa-play me-2"></i>Proje Kurulumuna Başla
+    </a>
+</div>
+
+<!-- AI Helper Info -->
+<div class="ai-helper mt-4">
+    <h5><i class="fas fa-robot me-2"></i>AI Yardımcısı</h5>
+    <p class="mb-2">
+        Bu uygulamada <strong>AI ile Otomatik Doldur</strong> özelliği bulunmaktadır. 
+        Proje açıklamanızı girdikten sonra AI, form alanlarını otomatik olarak doldurabilir.
+    </p>
+    <div class="row">
+        <div class="col-md-6">
+            <h6><i class="fas fa-magic me-2"></i>AI Neler Yapabilir?</h6>
+            <ul class="mb-0">
+                <li>Proje türünü otomatik belirler</li>
+                <li>Uygun teknoloji stack'i önerir</li>
+                <li>Hedef kitleyi analiz eder</li>
+                <li>Zaman çizelgesi önerir</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h6><i class="fas fa-list-check me-2"></i>Gereksinimler</h6>
+            <ul class="mb-0">
+                <li>Fonksiyonel gereksinimleri çıkarır</li>
+                <li>Teknik gereksinimleri belirler</li>
+                <li>Kısıtlamaları analiz eder</li>
+                <li>Ek önerilerde bulunur</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    let selectedTemplate = null;
+    
+    // Template seçimi
+    $('.template-card').click(function() {
+        // Önceki seçimi temizle
+        $('.template-card').removeClass('selected');
+        
+        // Yeni seçimi işaretle
+        $(this).addClass('selected');
+        selectedTemplate = $(this).data('template');
+        
+        // Butonu aktif et
+        $('#useTemplate').prop('disabled', false);
+    });
+    
+    // Template temizleme
+    $('#clearTemplate').click(function() {
+        $('.template-card').removeClass('selected');
+        selectedTemplate = null;
+        $('#useTemplate').prop('disabled', true);
+    });
+    
+    // Template ile devam etme
+    $('#useTemplate').click(function() {
+        if (selectedTemplate) {
+            const button = $(this);
+            showLoading(button);
+            
+            fetch('/api/select-template', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ template_id: selectedTemplate })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading(button);
+                
+                if (data.success) {
+                    showAlert('success', data.message);
+                    // Proje kurulumuna yönlendir
+                    setTimeout(() => {
+                        window.location.href = '/project-setup';
+                    }, 1000);
+                } else {
+                    showAlert('danger', data.error);
+                }
+            })
+            .catch(error => {
+                hideLoading(button);
+                showAlert('danger', 'Template seçme hatası: ' + error);
+            });
+        }
+    });
+});
+</script>
+{% endblock %} 

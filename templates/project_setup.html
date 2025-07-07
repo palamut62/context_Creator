@@ -1,0 +1,473 @@
+{% extends "base.html" %}
+
+{% block title %}Proje Kurulumu - Context Engineering PRP Generator{% endblock %}
+
+{% block content %}
+<div class="main-header">
+    <h1><i class="fas fa-clipboard me-3"></i>Proje Kurulumu</h1>
+    <p class="lead">Projenizin temel bilgilerini girin</p>
+</div>
+
+<!-- Template Info -->
+{% if session.selected_template %}
+<div class="alert alert-success">
+    <h5><i class="fas fa-check-circle me-2"></i>{{ templates[session.selected_template].title }} Template'i Seçildi</h5>
+    <p class="mb-2">{{ templates[session.selected_template].description }}</p>
+    <p class="mb-0"><strong>Bu template'den gelen veriler otomatik olarak doldurulacaktır.</strong></p>
+    <button class="btn btn-outline-success btn-sm mt-2" id="changeTemplate">
+        <i class="fas fa-sync me-2"></i>Farklı Template Seç
+    </button>
+</div>
+{% endif %}
+
+<!-- AI Helper -->
+{% if ai_data %}
+<div class="alert alert-info">
+    <h5><i class="fas fa-robot me-2"></i>AI Otomatik Doldurma Aktif</h5>
+    <p class="mb-2">Form alanları proje açıklamasına göre AI tarafından otomatik doldurulmuştur.</p>
+    <p class="mb-0">İstediğiniz alanları düzenleyebilir veya AI verilerini temizleyebilirsiniz.</p>
+</div>
+{% endif %}
+
+<!-- AI Helper Section -->
+<div class="ai-helper mb-4">
+    <h5><i class="fas fa-robot me-2"></i>AI Yardımcısı</h5>
+    <p class="mb-3">Proje açıklamanızı girin ve AI'ın formu otomatik doldurmasını sağlayın:</p>
+    
+    <div class="mb-3">
+        <label for="aiDescription" class="form-label">Proje Açıklaması (AI için)</label>
+        <textarea class="form-control" id="aiDescription" rows="4" 
+                  placeholder="Projenizin ne yaptığını ve amacını detaylı olarak açıklayın. AI bu açıklamaya göre formu doldurur."
+                  >{{ ai_data.description if ai_data else '' }}</textarea>
+        <div class="form-text">AI bu açıklamayı analiz ederek tüm form alanlarını otomatik doldurur.</div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <button class="btn btn-primary w-100" id="aiFillBtn">
+                <i class="fas fa-magic me-2"></i>AI ile Otomatik Doldur
+            </button>
+        </div>
+        <div class="col-md-6">
+            <button class="btn btn-outline-danger w-100" id="clearAiBtn" {% if not ai_data %}disabled{% endif %}>
+                <i class="fas fa-trash me-2"></i>AI Verilerini Temizle
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Project Setup Form -->
+<div class="card">
+    <div class="card-header">
+        <h5><i class="fas fa-edit me-2"></i>Temel Proje Bilgileri</h5>
+    </div>
+    <div class="card-body">
+        <form id="projectForm">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="projectName" class="form-label">Proje Adı *</label>
+                        <input type="text" class="form-control" id="projectName" 
+                               value="{{ ai_data.project_name if ai_data else (template_data.project_data.project_name if template_data and template_data.project_data else '') }}"
+                               placeholder="Projenizin adını girin" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="projectType" class="form-label">Proje Türü *</label>
+                        <select class="form-select" id="projectType" required>
+                            <option value="">Seçiniz...</option>
+                            <option value="Web Application">Web Application</option>
+                            <option value="Mobile App">Mobile App</option>
+                            <option value="Desktop Application">Desktop Application</option>
+                            <option value="API/Backend Service">API/Backend Service</option>
+                            <option value="Static Website">Static Website</option>
+                            <option value="E-commerce Platform">E-commerce Platform</option>
+                            <option value="Dashboard/Analytics">Dashboard/Analytics</option>
+                            <option value="Marketing Website">Marketing Website</option>
+                            <option value="Portfolio Website">Portfolio Website</option>
+                            <option value="Blog/CMS">Blog/CMS</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="timeline" class="form-label">Zaman Çizelgesi</label>
+                        <select class="form-select" id="timeline">
+                            <option value="1-2 hafta">1-2 hafta</option>
+                            <option value="2-3 hafta">2-3 hafta</option>
+                            <option value="1-2 ay">1-2 ay</option>
+                            <option value="2-3 ay">2-3 ay</option>
+                            <option value="3-6 ay">3-6 ay</option>
+                            <option value="6+ ay">6+ ay</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="targetAudience" class="form-label">Hedef Kitle</label>
+                        <input type="text" class="form-control" id="targetAudience" 
+                               value="{{ ai_data.target_audience if ai_data else (template_data.project_data.target_audience if template_data and template_data.project_data else '') }}"
+                               placeholder="Uygulamanızın hedef kullanıcı kitlesini tanımlayın">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="deploymentTarget" class="form-label">Deployment Hedefi</label>
+                        <select class="form-select" id="deploymentTarget">
+                            <option value="Vercel">Vercel</option>
+                            <option value="Netlify">Netlify</option>
+                            <option value="AWS">AWS</option>
+                            <option value="Google Cloud">Google Cloud</option>
+                            <option value="Azure">Azure</option>
+                            <option value="Heroku">Heroku</option>
+                            <option value="DigitalOcean">DigitalOcean</option>
+                            <option value="Self-hosted">Self-hosted</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="budgetRange" class="form-label">Bütçe Aralığı</label>
+                        <select class="form-select" id="budgetRange">
+                            <option value="Kişisel proje">Kişisel proje</option>
+                            <option value="Küçük bütçe (< $1K)">Küçük bütçe (< $1K)</option>
+                            <option value="Orta bütçe ($1K - $10K)">Orta bütçe ($1K - $10K)</option>
+                            <option value="Büyük bütçe ($10K+)">Büyük bütçe ($10K+)</option>
+                            <option value="Kurumsal proje">Kurumsal proje</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="description" class="form-label">Proje Açıklaması *</label>
+                <textarea class="form-control" id="description" rows="4" 
+                          placeholder="Projenizin ne yaptığını ve amacını detaylı olarak açıklayın" required
+                          >{{ ai_data.description if ai_data else (template_data.project_data.description if template_data and template_data.project_data else '') }}</textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="mainGoals" class="form-label">Ana Hedefler</label>
+                <textarea class="form-control" id="mainGoals" rows="4" 
+                          placeholder="Projenizin ana hedeflerini listeleyin (her satıra bir hedef)"
+                          >{% if ai_data and ai_data.main_goals %}{{ ai_data.main_goals|join('\n') }}{% elif template_data and template_data.project_data and template_data.project_data.main_goals %}{{ template_data.project_data.main_goals|join('\n') }}{% endif %}</textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Teknoloji Stack</label>
+                <div class="row" id="techStack">
+                    <!-- Frontend -->
+                    <div class="col-md-2">
+                        <h6>Frontend</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="React" id="tech_React">
+                            <label class="form-check-label" for="tech_React">React</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Vue.js" id="tech_Vue">
+                            <label class="form-check-label" for="tech_Vue">Vue.js</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Angular" id="tech_Angular">
+                            <label class="form-check-label" for="tech_Angular">Angular</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Next.js" id="tech_Next">
+                            <label class="form-check-label" for="tech_Next">Next.js</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Backend -->
+                    <div class="col-md-2">
+                        <h6>Backend</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Node.js" id="tech_Node">
+                            <label class="form-check-label" for="tech_Node">Node.js</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Python" id="tech_Python">
+                            <label class="form-check-label" for="tech_Python">Python</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Java" id="tech_Java">
+                            <label class="form-check-label" for="tech_Java">Java</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="C#" id="tech_CSharp">
+                            <label class="form-check-label" for="tech_CSharp">C#</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Database -->
+                    <div class="col-md-2">
+                        <h6>Database</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="PostgreSQL" id="tech_PostgreSQL">
+                            <label class="form-check-label" for="tech_PostgreSQL">PostgreSQL</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="MySQL" id="tech_MySQL">
+                            <label class="form-check-label" for="tech_MySQL">MySQL</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="MongoDB" id="tech_MongoDB">
+                            <label class="form-check-label" for="tech_MongoDB">MongoDB</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Firebase" id="tech_Firebase">
+                            <label class="form-check-label" for="tech_Firebase">Firebase</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Styling -->
+                    <div class="col-md-3">
+                        <h6>Styling</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Tailwind CSS" id="tech_Tailwind">
+                            <label class="form-check-label" for="tech_Tailwind">Tailwind CSS</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Bootstrap" id="tech_Bootstrap">
+                            <label class="form-check-label" for="tech_Bootstrap">Bootstrap</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Styled Components" id="tech_StyledComponents">
+                            <label class="form-check-label" for="tech_StyledComponents">Styled Components</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Cloud -->
+                    <div class="col-md-3">
+                        <h6>Cloud</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="AWS" id="tech_AWS">
+                            <label class="form-check-label" for="tech_AWS">AWS</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Google Cloud" id="tech_GCP">
+                            <label class="form-check-label" for="tech_GCP">Google Cloud</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Azure" id="tech_Azure">
+                            <label class="form-check-label" for="tech_Azure">Azure</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <label for="customTech" class="form-label">Diğer Teknolojiler</label>
+                    <input type="text" class="form-control" id="customTech" 
+                           placeholder="Listede olmayan teknolojileri virgülle ayırarak girin">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <a href="/" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-arrow-left me-2"></i>Geri
+                    </a>
+                </div>
+                <div class="col-md-4"></div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-arrow-right me-2"></i>Devam Et
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Data için script tag'leri -->
+{% if session.ai_filled_data %}
+<script id="ai-data" type="application/json">{{ session.ai_filled_data|tojson|safe }}</script>
+{% endif %}
+
+{% if session.template_data and session.template_data.project_data %}
+<script id="template-data" type="application/json">{{ session.template_data.project_data|tojson|safe }}</script>
+{% endif %}
+
+<script>
+$(document).ready(function() {
+    // AI'dan gelen verileri form'a doldur
+    const aiDataElement = document.getElementById('ai-data');
+    if (aiDataElement) {
+        const aiData = JSON.parse(aiDataElement.textContent);
+        fillFormWithAiData(aiData);
+    }
+    
+    // Template'den gelen verileri form'a doldur
+    const templateDataElement = document.getElementById('template-data');
+    if (templateDataElement) {
+        const templateData = JSON.parse(templateDataElement.textContent);
+        fillFormWithTemplateData(templateData);
+    }
+    
+    // AI ile form doldurma
+    $('#aiFillBtn').click(function() {
+        const description = $('#aiDescription').val().trim();
+        
+        if (!description) {
+            showAlert('warning', 'Önce proje açıklamasını girin!');
+            return;
+        }
+        
+        const button = $(this);
+        showLoading(button);
+        
+        fetch('/api/ai-fill-form', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ description: description })
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading(button);
+            
+            if (data.success) {
+                showAlert('success', data.message);
+                fillFormWithAiData(data.data);
+                $('#clearAiBtn').prop('disabled', false);
+            } else {
+                showAlert('danger', data.error);
+            }
+        })
+        .catch(error => {
+            hideLoading(button);
+            showAlert('danger', 'AI doldurma hatası: ' + error);
+        });
+    });
+    
+    // AI verilerini temizle
+    $('#clearAiBtn').click(function() {
+        const button = $(this);
+        showLoading(button);
+        
+        fetch('/api/clear-ai-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ type: 'form' })
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading(button);
+            
+            if (data.success) {
+                showAlert('success', data.message);
+                clearForm();
+                button.prop('disabled', true);
+            } else {
+                showAlert('danger', data.error);
+            }
+        })
+        .catch(error => {
+            hideLoading(button);
+            showAlert('danger', 'Temizleme hatası: ' + error);
+        });
+    });
+    
+    // Form submit
+    $('#projectForm').submit(function(e) {
+        e.preventDefault();
+        
+        // Form verilerini topla
+        const formData = {
+            project_name: $('#projectName').val(),
+            project_type: $('#projectType').val(),
+            description: $('#description').val(),
+            target_audience: $('#targetAudience').val(),
+            timeline: $('#timeline').val(),
+            deployment_target: $('#deploymentTarget').val(),
+            budget_range: $('#budgetRange').val(),
+            main_goals: $('#mainGoals').val().split('\n').filter(goal => goal.trim()),
+            tech_stack: getSelectedTechnologies(),
+            custom_tech: $('#customTech').val()
+        };
+        
+        // Validasyon
+        if (!formData.project_name || !formData.project_type || !formData.description) {
+            showAlert('warning', 'Proje adı, türü ve açıklaması zorunludur!');
+            return;
+        }
+        
+        // Kaydet
+        fetch('/api/save-project', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                // Gereksinimler sayfasına yönlendir
+                setTimeout(() => {
+                    window.location.href = '/requirements';
+                }, 1000);
+            } else {
+                showAlert('danger', data.error);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Kaydetme hatası: ' + error);
+        });
+    });
+    
+    // Yardımcı fonksiyonlar
+    function fillFormWithAiData(data) {
+        if (data.project_name) $('#projectName').val(data.project_name);
+        if (data.project_type) $('#projectType').val(data.project_type);
+        if (data.target_audience) $('#targetAudience').val(data.target_audience);
+        if (data.timeline) $('#timeline').val(data.timeline);
+        if (data.deployment_target) $('#deploymentTarget').val(data.deployment_target);
+        if (data.budget_range) $('#budgetRange').val(data.budget_range);
+        if (data.description) $('#description').val(data.description);
+        if (data.main_goals) $('#mainGoals').val(data.main_goals.join('\n'));
+        if (data.tech_stack) setSelectedTechnologies(data.tech_stack);
+    }
+    
+    function fillFormWithTemplateData(data) {
+        if (data.project_name) $('#projectName').val(data.project_name);
+        if (data.project_type) $('#projectType').val(data.project_type);
+        if (data.target_audience) $('#targetAudience').val(data.target_audience);
+        if (data.timeline) $('#timeline').val(data.timeline);
+        if (data.deployment_target) $('#deploymentTarget').val(data.deployment_target);
+        if (data.budget_range) $('#budgetRange').val(data.budget_range);
+        if (data.description) $('#description').val(data.description);
+        if (data.main_goals) $('#mainGoals').val(data.main_goals.join('\n'));
+        if (data.tech_stack) setSelectedTechnologies(data.tech_stack);
+    }
+    
+    function getSelectedTechnologies() {
+        const selected = [];
+        $('#techStack input[type="checkbox"]:checked').each(function() {
+            selected.push($(this).val());
+        });
+        return selected;
+    }
+    
+    function setSelectedTechnologies(techList) {
+        // Önce tümünü temizle
+        $('#techStack input[type="checkbox"]').prop('checked', false);
+        
+        // Seçilenleri işaretle
+        techList.forEach(tech => {
+            $('#techStack input[value="' + tech + '"]').prop('checked', true);
+        });
+    }
+    
+    function clearForm() {
+        $('#projectForm')[0].reset();
+        $('#techStack input[type="checkbox"]').prop('checked', false);
+    }
+});
+</script>
+{% endblock %} 

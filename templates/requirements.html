@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Gereksinimler - Context Engineering PRP Generator{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4><i class="fas fa-edit me-2"></i>Proje Gereksinimleri</h4>
+        <p class="text-muted mb-0">Projenizin detaylı gereksinimlerini belirleyin</p>
+    </div>
+    <div class="card-body">
+        <!-- AI Helper -->
+        <div class="ai-helper">
+            <h5><i class="fas fa-robot me-2"></i>AI Yardımcısı</h5>
+            <p>Proje açıklamanızı analiz ederek gereksinimleri otomatik olarak oluşturabilirim.</p>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-primary" id="aiRequirementsBtn">
+                    <i class="fas fa-magic me-2"></i>AI ile Gereksinimleri Doldur
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="clearAiRequirementsBtn">
+                    <i class="fas fa-eraser me-2"></i>AI Verilerini Temizle
+                </button>
+            </div>
+        </div>
+
+        <form method="POST" id="requirementsForm">
+            <div class="row">
+                <!-- Fonksiyonel Gereksinimler -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="functional_requirements" class="form-label">
+                            <i class="fas fa-cogs me-2"></i>Fonksiyonel Gereksinimler
+                        </label>
+                        <textarea class="form-control" id="functional_requirements" 
+                                  name="functional_requirements" rows="8" 
+                                  placeholder="Örnek:&#10;- Kullanıcı kayıt/giriş sistemi&#10;- Ürün katalog yönetimi&#10;- Sepet işlemleri&#10;- Ödeme entegrasyonu">{{ session.project_data.functional_requirements or '' }}</textarea>
+                        <small class="text-muted">Sistemin yapması gereken işlevleri listeleyin</small>
+                    </div>
+                </div>
+
+                <!-- Fonksiyonel Olmayan Gereksinimler -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="non_functional_requirements" class="form-label">
+                            <i class="fas fa-tachometer-alt me-2"></i>Fonksiyonel Olmayan Gereksinimler
+                        </label>
+                        <textarea class="form-control" id="non_functional_requirements" 
+                                  name="non_functional_requirements" rows="8" 
+                                  placeholder="Örnek:&#10;- Performans: 2 saniye içinde yanıt&#10;- Güvenlik: SSL/TLS şifreleme&#10;- Kullanılabilirlik: Mobil uyumlu&#10;- Ölçeklenebilirlik: 1000 eş zamanlı kullanıcı">{{ session.project_data.non_functional_requirements or '' }}</textarea>
+                        <small class="text-muted">Performans, güvenlik, kullanılabilirlik vb. gereksinimler</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Teknik Kısıtlamalar -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="technical_constraints" class="form-label">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Teknik Kısıtlamalar
+                        </label>
+                        <textarea class="form-control" id="technical_constraints" 
+                                  name="technical_constraints" rows="6" 
+                                  placeholder="Örnek:&#10;- Mevcut veritabanı ile uyumlu olmalı&#10;- Belirli API'ler kullanılmalı&#10;- Bütçe kısıtlamaları&#10;- Zaman kısıtlamaları">{{ session.project_data.technical_constraints or '' }}</textarea>
+                        <small class="text-muted">Proje kısıtlamaları ve sınırlamalar</small>
+                    </div>
+                </div>
+
+                <!-- Kabul Kriterleri -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="acceptance_criteria" class="form-label">
+                            <i class="fas fa-check-circle me-2"></i>Kabul Kriterleri
+                        </label>
+                        <textarea class="form-control" id="acceptance_criteria" 
+                                  name="acceptance_criteria" rows="6" 
+                                  placeholder="Örnek:&#10;- Tüm unit testler geçmeli&#10;- Kod coverage %80 üzerinde&#10;- Performans testleri başarılı&#10;- Güvenlik taraması temiz">{{ session.project_data.acceptance_criteria or '' }}</textarea>
+                        <small class="text-muted">Projenin tamamlanmış sayılması için gerekli kriterler</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Kullanıcı Hikayeleri -->
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label for="user_stories" class="form-label">
+                            <i class="fas fa-user-friends me-2"></i>Kullanıcı Hikayeleri
+                        </label>
+                        <textarea class="form-control" id="user_stories" 
+                                  name="user_stories" rows="8" 
+                                  placeholder="Örnek:&#10;- Bir kullanıcı olarak, hesap oluşturabilmek istiyorum ki sisteme giriş yapabileyim&#10;- Bir müşteri olarak, ürünleri kategorilere göre filtreleyebilmek istiyorum&#10;- Bir admin olarak, kullanıcı hesaplarını yönetebilmek istiyorum">{{ session.project_data.user_stories or '' }}</textarea>
+                        <small class="text-muted">Kullanıcı perspektifinden sistem gereksinimleri</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Bağımlılıklar -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="dependencies" class="form-label">
+                            <i class="fas fa-link me-2"></i>Bağımlılıklar ve Entegrasyonlar
+                        </label>
+                        <textarea class="form-control" id="dependencies" 
+                                  name="dependencies" rows="6" 
+                                  placeholder="Örnek:&#10;- Ödeme sistemi: Stripe API&#10;- E-posta servisi: SendGrid&#10;- Harita servisi: Google Maps API&#10;- Veritabanı: PostgreSQL">{{ session.project_data.dependencies or '' }}</textarea>
+                        <small class="text-muted">Dış sistemler ve API entegrasyonları</small>
+                    </div>
+                </div>
+
+                <!-- Riskler -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="risks" class="form-label">
+                            <i class="fas fa-exclamation-circle me-2"></i>Potansiyel Riskler
+                        </label>
+                        <textarea class="form-control" id="risks" 
+                                  name="risks" rows="6" 
+                                  placeholder="Örnek:&#10;- API değişiklikleri&#10;- Performans sorunları&#10;- Güvenlik açıkları&#10;- Zaman aşımları">{{ session.project_data.risks or '' }}</textarea>
+                        <small class="text-muted">Proje risklerini ve önlemlerini belirtin</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="/project-setup" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Önceki Adım
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-arrow-right me-2"></i>Sonraki Adım
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // AI ile gereksinimleri doldur
+    $('#aiRequirementsBtn').click(function() {
+        const btn = $(this);
+        showLoading(btn);
+        
+        fetch('/api/ai-fill-requirements', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading(btn);
+            
+            if (data.success) {
+                // Form alanlarını doldur
+                if (data.requirements.functional_requirements) {
+                    $('#functional_requirements').val(data.requirements.functional_requirements);
+                }
+                if (data.requirements.non_functional_requirements) {
+                    $('#non_functional_requirements').val(data.requirements.non_functional_requirements);
+                }
+                if (data.requirements.technical_constraints) {
+                    $('#technical_constraints').val(data.requirements.technical_constraints);
+                }
+                if (data.requirements.acceptance_criteria) {
+                    $('#acceptance_criteria').val(data.requirements.acceptance_criteria);
+                }
+                if (data.requirements.user_stories) {
+                    $('#user_stories').val(data.requirements.user_stories);
+                }
+                if (data.requirements.dependencies) {
+                    $('#dependencies').val(data.requirements.dependencies);
+                }
+                if (data.requirements.risks) {
+                    $('#risks').val(data.requirements.risks);
+                }
+                
+                showAlert('success', 'Gereksinimler AI tarafından başarıyla dolduruldu!');
+            } else {
+                showAlert('danger', 'Hata: ' + data.error);
+            }
+        })
+        .catch(error => {
+            hideLoading(btn);
+            showAlert('danger', 'AI gereksinimleri doldurma hatası: ' + error);
+        });
+    });
+    
+    // AI verilerini temizle
+    $('#clearAiRequirementsBtn').click(function() {
+        if (confirm('AI tarafından doldurulan gereksinimler temizlenecek. Emin misiniz?')) {
+            $('#functional_requirements').val('');
+            $('#non_functional_requirements').val('');
+            $('#technical_constraints').val('');
+            $('#acceptance_criteria').val('');
+            $('#user_stories').val('');
+            $('#dependencies').val('');
+            $('#risks').val('');
+            
+            showAlert('info', 'AI verileri temizlendi.');
+        }
+    });
+    
+    // Form submit
+    $('#requirementsForm').submit(function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            functional_requirements: $('#functional_requirements').val(),
+            non_functional_requirements: $('#non_functional_requirements').val(),
+            technical_constraints: $('#technical_constraints').val(),
+            acceptance_criteria: $('#acceptance_criteria').val(),
+            user_stories: $('#user_stories').val(),
+            dependencies: $('#dependencies').val(),
+            risks: $('#risks').val()
+        };
+        
+        fetch('/requirements', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/generation';
+            } else {
+                showAlert('danger', 'Hata: ' + data.error);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Form gönderme hatası: ' + error);
+        });
+    });
+});
+</script>
+{% endblock %} 
