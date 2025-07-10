@@ -28,7 +28,7 @@ from flask_cors import CORS
 # Proje dizinini Python path'ine ekle
 sys.path.append(str(Path(__file__).parent))
 
-from src.utils.config import load_config, get_available_providers
+from src.utils.config import load_config, get_available_providers, get_provider_info
 from src.utils.logger import setup_logger
 from src.agents.form_filler_agent import FormFillerAgent
 from src.agents.prp_generator_agent import PRPGeneratorAgent
@@ -36,6 +36,7 @@ from src.agents.team_manager import SoftwareEngineeringTeam
 from src.api.llm_factory import LLMProviderFactory
 from src.models.project_data import ProjectData, ProjectRequirements, ProjectType, ProgrammingLanguage, Platform, TeamSize, Timeline
 from src.ui.project_templates import ProjectTemplates
+from src.utils.db import init_db, save_api_keys as db_save_keys, load_api_keys
 
 # Geçici dosyalar için dizin
 TEMP_DIR = os.path.join(os.path.dirname(__file__), 'temp')
@@ -74,6 +75,25 @@ except Exception as e:
 
 # Template'leri yükle
 templates = ProjectTemplates.get_templates()
+
+# Veritabanını başlat
+init_db()
+
+# Senkronizasyon yardımcı fonksiyonu
+def _sync_config_api_keys():
+    """Veritabanındaki API anahtarlarına göre provider config'lerini günceller."""
+    db_keys = load_api_keys()
+    for name, provider_cfg in config.providers.items():
+        db_key = db_keys.get(name, {}).get('api_key') if db_keys else None
+        provider_cfg.api_key = db_key if db_key else None
+
+    # default_provider'ı güncelle
+    available = [n for n, p in config.providers.items() if p.api_key]
+    if available and config.default_provider not in available:
+        config.default_provider = available[0]
+
+# Uygulama başlatılırken bir kez çalıştır
+_sync_config_api_keys()
 
 def save_to_temp_file(data, prefix='data'):
     """Büyük veriyi geçici dosyaya kaydet"""
@@ -123,17 +143,10 @@ def cleanup_temp_files():
 
 @app.route('/')
 def index():
-    """Ana sayfa"""
-    # Session'ı başlat
-    if 'current_step' not in session:
-        session['current_step'] = 'welcome'
-    
-    # Provider bilgilerini al
-    available_providers = get_available_providers(config)
-    
-    return render_template('index.html', 
-                         available_providers=available_providers,
-                         templates=templates)
+    """Kök URL doğrudan proje kurulumu adımına yönlendirir"""
+    # İlk adım olarak proje kurulumunu işaretle
+    session['current_step'] = 'project_setup'
+    return redirect(url_for('project_setup'))
 
 @app.route('/project-setup', methods=['GET', 'POST'])
 def project_setup():
@@ -154,8 +167,7 @@ def project_setup():
             'deployment_target': data.get('deployment_target'),
             'budget_range': data.get('budget_range'),
             'main_goals': data.get('main_goals', []),
-            'tech_stack': data.get('tech_stack', []),
-            'custom_tech': data.get('custom_tech')
+            'tech_stack': data.get('tech_stack', [])
         }
         
         session['project_data'] = project_data
@@ -271,93 +283,72 @@ def results():
 
 @app.route('/api/ai-fill-form', methods=['POST'])
 def ai_fill_form():
-    """AI ile form doldurma API'si"""
+    data = request.get_json()
+    description = data.get('description')
+    if not description:
+        return jsonify({'success': False, 'error': 'Project description is required'}), 400
+
+    expanded_desc = session.get('expanded_description', description)
+    provider_name = session.get('selected_provider', config.default_provider)
+    _apply_session_api_key(provider_name)
+    factory = LLMProviderFactory(config)
+    llm_client = factory.create_client(provider_name)
+    
     try:
-        data = request.get_json()
-        description = data.get('description', '')
-        
-        if not description.strip():
-            return jsonify({'error': 'Proje açıklaması gereklidir'}), 400
-        
-        # LLM client oluştur
-        selected_provider = session.get('selected_provider', config.default_provider)
-        llm_factory = LLMProviderFactory(config)
-        llm_client = llm_factory.create_client(selected_provider)
-        
-        # Form filler agent'ı oluştur
-        form_filler = FormFillerAgent(llm_client, logger)
-        
-        # Async fonksiyonu çalıştır
-        filled_data = asyncio.run(form_filler.analyze_and_fill_form(description))
-        
-        # Session'a kaydet
-        session['ai_filled_data'] = filled_data
-        
-        return jsonify({
-            'success': True,
-            'data': filled_data,
-            'message': 'Form AI tarafından başarıyla dolduruldu'
-        })
-        
+        agent = FormFillerAgent(llm_client, logger)
+        filled_data = asyncio.run(agent.analyze_and_fill_form(expanded_desc))
+        project_fields = {
+            'project_name': filled_data.get('project_name'),
+            'project_type': filled_data.get('project_type'),
+            'description': filled_data.get('description'),
+            'target_audience': filled_data.get('target_audience'),
+            'timeline': filled_data.get('timeline'),
+            'deployment_target': filled_data.get('deployment_target'),
+            'budget_range': filled_data.get('budget_range'),
+            'main_goals': filled_data.get('main_goals', []),
+            'tech_stack': filled_data.get('tech_stack', [])
+        }
+        session['ai_filled_data'] = project_fields
+        return jsonify({'success': True, 'filled_data': project_fields})
     except Exception as e:
-        logger.error(f"AI form doldurma hatası: {str(e)}")
-        return jsonify({'error': f'AI doldurma hatası: {str(e)}'}), 500
+        logger.error(f"Form filling error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/ai-fill-requirements', methods=['POST'])
 def ai_fill_requirements():
-    """AI ile gereksinimler doldurma API'si"""
+    data = request.get_json(silent=True) or {}
+    description = data.get('description')
+    
+    if not description:
+        project_data = session.get('project_data', {})
+        description = project_data.get('description')
+    
+    expanded_desc = session.get('expanded_description', description)
+    if not expanded_desc:
+        return jsonify({'success': False, 'error': 'Project description is required'}), 400
+    
+    provider_name = session.get('selected_provider', config.default_provider)
+    _apply_session_api_key(provider_name)
+    factory = LLMProviderFactory(config)
+    llm_client = factory.create_client(provider_name)
+    
     try:
-        # Proje açıklamasını al
-        project_data = session.get('project_data')
-        if not project_data or not project_data.get('description'):
-            return jsonify({'error': 'Proje açıklaması bulunamadı'}), 400
-        
-        # LLM client oluştur
-        selected_provider = session.get('selected_provider', config.default_provider)
-        llm_factory = LLMProviderFactory(config)
-        llm_client = llm_factory.create_client(selected_provider)
-        
-        # Form filler agent'ı oluştur
-        form_filler = FormFillerAgent(llm_client, logger)
-        
-        # Async fonksiyonu çalıştır
-        filled_data = asyncio.run(form_filler.analyze_and_fill_form(project_data['description']))
-        
-        # Gereksinimler için özel alanları çıkar
-        requirements = {
+        agent = FormFillerAgent(llm_client, logger)
+        filled_data = asyncio.run(agent.analyze_and_fill_form(expanded_desc))
+        requirements_fields = {
             'functional_requirements': '\n'.join(filled_data.get('functional_requirements', [])),
             'non_functional_requirements': '\n'.join(filled_data.get('non_functional_requirements', [])),
             'technical_constraints': '\n'.join(filled_data.get('constraints', [])),
-            'acceptance_criteria': '\n'.join([
-                'Tüm fonksiyonel gereksinimler karşılanmalı',
-                'Performans testleri başarılı olmalı',
-                'Güvenlik testleri geçilmeli'
-            ]),
-            'user_stories': '\n'.join([
-                'Bir kullanıcı olarak, sisteme giriş yapabilmek istiyorum',
-                'Bir kullanıcı olarak, verilerimi görüntüleyebilmek istiyorum',
-                'Bir kullanıcı olarak, işlemlerimi güvenli şekilde gerçekleştirebilmek istiyorum'
-            ]),
+            'acceptance_criteria': '\n'.join(filled_data.get('acceptance_criteria', [])),
+            'user_stories': '\n'.join(filled_data.get('user_stories', [])),
             'dependencies': '\n'.join(filled_data.get('tech_stack', [])),
-            'risks': '\n'.join([
-                'Teknoloji değişiklikleri',
-                'Performans sorunları',
-                'Güvenlik açıkları'
-            ])
+            'risks': '\n'.join(filled_data.get('risks', []))
         }
-        
-        # Session'a kaydet
-        session['ai_filled_requirements'] = requirements
-        
-        return jsonify({
-            'success': True,
-            'requirements': requirements,
-            'message': 'Gereksinimler AI tarafından başarıyla dolduruldu'
-        })
-        
+        session['ai_filled_requirements'] = requirements_fields
+        return jsonify({'success': True, 'filled_data': requirements_fields})
     except Exception as e:
-        logger.error(f"AI gereksinim doldurma hatası: {str(e)}")
-        return jsonify({'error': f'AI doldurma hatası: {str(e)}'}), 500
+        logger.error(f"Requirements filling error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/clear-ai-data', methods=['POST'])
 def clear_ai_data():
@@ -482,6 +473,7 @@ def generate_prp():
         
         # LLM client oluştur
         selected_provider = session.get('selected_provider', config.default_provider)
+        _apply_session_api_key(selected_provider)
         llm_factory = LLMProviderFactory(config)
         llm_client = llm_factory.create_client(selected_provider)
         
@@ -752,6 +744,41 @@ def clear_session():
         logger.error(f"Session temizleme hatası: {str(e)}")
         return jsonify({'error': f'Session temizleme hatası: {str(e)}'}), 500
 
+@app.route('/api/clear-template', methods=['POST'])
+def clear_template():
+    """Seçili template'i temizleyen API"""
+    try:
+        session.pop('selected_template', None)
+        session.pop('use_template', None)
+        return jsonify({
+            'success': True,
+            'message': 'Şablon seçimi temizlendi'
+        })
+    except Exception as e:
+        logger.error(f"Template temizleme hatası: {str(e)}")
+        return jsonify({'error': f'Template temizleme hatası: {str(e)}'}), 500
+
+@app.route('/api/expand-description', methods=['POST'])
+def expand_description():
+    data = request.get_json()
+    description = data.get('description')
+    if not description:
+        return jsonify({'success': False, 'error': 'Description is required'}), 400
+
+    provider_name = session.get('selected_provider', config.default_provider)
+    _apply_session_api_key(provider_name)
+    
+    try:
+        factory = LLMProviderFactory(config)
+        llm_client = factory.create_client(provider_name)
+        prompt = f"Expand this short project description into a more detailed version, including key features, goals, and technical aspects: {description}"
+        expanded = asyncio.run(llm_client.generate_response(prompt))
+        session['expanded_description'] = expanded
+        return jsonify({'success': True, 'expanded_description': expanded})
+    except Exception as e:
+        logger.error(f"Description expansion error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 # Context processor for template variables
 @app.context_processor
 def inject_template_vars():
@@ -759,13 +786,15 @@ def inject_template_vars():
     return {
         'available_providers': get_available_providers(config),
         'current_step_index': get_current_step_index(),
-        'progress': get_progress_percentage()
+        'progress': get_progress_percentage(),
+        'templates': templates,
+        'provider_info': get_provider_info(config)
     }
 
 def get_current_step_index():
     """Mevcut adım indeksini döndür"""
-    current_step = session.get('current_step', 'welcome')
-    steps = ['welcome', 'project_setup', 'requirements', 'generation', 'results']
+    current_step = session.get('current_step', 'project_setup')
+    steps = ['project_setup', 'requirements', 'generation', 'results', 'api_keys']
     try:
         return steps.index(current_step) + 1
     except ValueError:
@@ -775,6 +804,61 @@ def get_progress_percentage():
     """İlerleme yüzdesini döndür"""
     current_step_index = get_current_step_index()
     return (current_step_index / 5) * 100
+
+# Yeni yardımcı: oturum API key'lerini config'e enjekte et
+def _apply_session_api_key(provider_name):
+    """Session'daki API anahtarını ilgili provider config'ine uygula"""
+    # öncelik oturum, sonra db
+    api_keys = session.get('api_keys') or load_api_keys()
+    key = None
+    model = None
+    if api_keys and provider_name in api_keys:
+        setting = api_keys[provider_name]
+        key = setting.get('api_key', '')
+        if isinstance(setting, dict):
+            model = setting.get('model') if setting.get('model') else None
+    if key:
+        try:
+            config.providers[provider_name].api_key = key
+            if model:
+                config.providers[provider_name].default_model = model
+        except Exception:
+            pass
+
+@app.route('/api-keys')
+def api_keys_page():
+    """API Key ayarları sayfası"""
+    session['current_step'] = 'api_keys'
+    provider_defaults = {p: getattr(config.providers[p], 'default_model', '') for p in config.providers}
+    return render_template('api_keys.html', providers=get_available_providers(config), saved_keys=load_api_keys(), defaults=provider_defaults)
+
+@app.route('/api/save-api-keys', methods=['POST'])
+def save_api_keys():
+    """API anahtarlarını kaydeder"""
+    try:
+        data = request.get_json()
+        api_keys = data.get('api_keys', {})
+        # Basit doğrulama
+        if not isinstance(api_keys, dict):
+            return jsonify({'error': 'Geçersiz veri'}), 400
+        # mevcutları al ve birleştir
+        current = load_api_keys()
+        merged = current.copy()
+        for prov, info in api_keys.items():
+            merged[prov] = merged.get(prov, {})
+            if info.get('api_key'):
+                merged[prov]['api_key'] = info['api_key']
+            if info.get('model'):
+                merged[prov]['model'] = info['model']
+        # oturuma sadece anahtarları koy
+        session['api_keys'] = {p: d.get('api_key') for p, d in merged.items() if d.get('api_key')}
+        db_save_keys(merged)
+        # Kaydetme sonrası config'i güncelle
+        _sync_config_api_keys()
+        return jsonify({'success': True, 'message': 'API anahtarları kaydedildi'})
+    except Exception as e:
+        logger.error(f"API anahtarları kaydetme hatası: {str(e)}")
+        return jsonify({'error': 'API anahtarları kaydedilemedi'}), 500
 
 if __name__ == '__main__':
     # Templates dizinini oluştur

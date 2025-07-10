@@ -1,282 +1,326 @@
 {% extends "base.html" %}
 
-{% block title %}Proje Kurulumu - Context Engineering PRP Generator{% endblock %}
+{% block title %}Project Setup - Context Engineering PRP Generator{% endblock %}
 
 {% block content %}
-<div class="main-header">
-    <h1><i class="fas fa-clipboard me-3"></i>Proje Kurulumu</h1>
-    <p class="lead">Projenizin temel bilgilerini girin</p>
+<!-- Page Header -->
+<div class="content-section">
+    <h1 class="section-title">Project Setup</h1>
+    <p class="section-description">
+        Enter the basic information for your project. The AI assistant can help you fill out the form.
+    </p>
 </div>
 
 <!-- Template Info -->
 {% if session.selected_template %}
 <div class="alert alert-success">
-    <h5><i class="fas fa-check-circle me-2"></i>{{ templates[session.selected_template].title }} Template'i Seçildi</h5>
-    <p class="mb-2">{{ templates[session.selected_template].description }}</p>
-    <p class="mb-0"><strong>Bu template'den gelen veriler otomatik olarak doldurulacaktır.</strong></p>
-    <button class="btn btn-outline-success btn-sm mt-2" id="changeTemplate">
-        <i class="fas fa-sync me-2"></i>Farklı Template Seç
+    <i class="fas fa-check-circle mr-2"></i>
+    <span><strong>{{ templates[session.selected_template].title }}</strong> template selected. Form fields will be automatically filled.</span>
+    <button class="ml-auto text-green-700 hover:text-green-900" onclick="window.location.href='/'">
+        <i class="fas fa-times"></i>
     </button>
 </div>
 {% endif %}
 
-<!-- AI Helper -->
-{% if ai_data %}
-<div class="alert alert-info">
-    <h5><i class="fas fa-robot me-2"></i>AI Otomatik Doldurma Aktif</h5>
-    <p class="mb-2">Form alanları proje açıklamasına göre AI tarafından otomatik doldurulmuştur.</p>
-    <p class="mb-0">İstediğiniz alanları düzenleyebilir veya AI verilerini temizleyebilirsiniz.</p>
-</div>
-{% endif %}
-
-<!-- AI Helper Section -->
-<div class="ai-helper mb-4">
-    <h5><i class="fas fa-robot me-2"></i>AI Yardımcısı</h5>
-    <p class="mb-3">Proje açıklamanızı girin ve AI'ın formu otomatik doldurmasını sağlayın:</p>
-    
-    <div class="mb-3">
-        <label for="aiDescription" class="form-label">Proje Açıklaması (AI için)</label>
-        <textarea class="form-control" id="aiDescription" rows="4" 
-                  placeholder="Projenizin ne yaptığını ve amacını detaylı olarak açıklayın. AI bu açıklamaya göre formu doldurur."
-                  >{{ ai_data.description if ai_data else '' }}</textarea>
-        <div class="form-text">AI bu açıklamayı analiz ederek tüm form alanlarını otomatik doldurur.</div>
-    </div>
-    
-    <div class="row">
-        <div class="col-md-6">
-            <button class="btn btn-primary w-100" id="aiFillBtn">
-                <i class="fas fa-magic me-2"></i>AI ile Otomatik Doldur
-            </button>
+<!-- AI Assistant Section -->
+<div class="message ai-response mb-6">
+    <div class="flex items-start gap-3">
+        <div class="bg-purple-100 text-purple-600 p-2 rounded-lg">
+            <i class="fas fa-robot text-lg"></i>
         </div>
-        <div class="col-md-6">
-            <button class="btn btn-outline-danger w-100" id="clearAiBtn" {% if not ai_data %}disabled{% endif %}>
-                <i class="fas fa-trash me-2"></i>AI Verilerini Temizle
-            </button>
+        <div class="flex-1">
+            <h3 class="font-medium mb-3">AI Auto-Fill Form</h3>
+            <p class="text-sm text-gray-600 mb-4">
+                Describe your project briefly, and the AI will automatically fill out the form for you.
+            </p>
+            
+            <div class="form-group relative">
+                <textarea class="form-textarea pr-10 pb-8" id="aiDescription" rows="3" 
+                          placeholder="Example: A mobile application for users to track their daily habits. To be developed with React Native, using Firebase..."
+                          >{{ ai_data.description if ai_data else '' }}</textarea>
+                <button type="button" id="expandDescriptionBtn" class="absolute right-2 bottom-2 text-purple-600 hover:text-purple-800 text-xl"
+                        title="Expand description with AI">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                </button>
+            </div>
+            
+            <div class="flex gap-3">
+                <button class="btn btn-primary" id="aiFillBtn">
+                    <i class="fas fa-magic mr-2"></i>
+                    AI ile Doldur
+                </button>
+                {% if ai_data %}
+                <button class="btn btn-secondary" id="clearAiBtn">
+                    <i class="fas fa-eraser mr-2"></i>
+                    AI Verilerini Temizle
+                </button>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Project Setup Form -->
-<div class="card">
-    <div class="card-header">
-        <h5><i class="fas fa-edit me-2"></i>Temel Proje Bilgileri</h5>
+<!-- Project Form -->
+<form id="projectForm" class="space-y-6">
+    <!-- Basic Information -->
+    <div class="content-section">
+        <h2 class="text-xl font-semibold mb-4">Basic Information</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="form-group">
+                <label for="projectName" class="form-label">
+                    Project Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" class="form-input" id="projectName" 
+                       value="{{ ai_data.project_name if ai_data else (template_data.project_data.project_name if template_data and template_data.project_data else '') }}"
+                       placeholder="Example: Task Manager Pro" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="projectType" class="form-label">
+                    Project Type <span class="text-red-500">*</span>
+                </label>
+                <select class="form-select" id="projectType" required>
+                    <option value="">Select an option...</option>
+                    <option value="Web Application">Web Application</option>
+                    <option value="Mobile App">Mobile App</option>
+                    <option value="Desktop Application">Desktop Application</option>
+                    <option value="API/Backend Service">API/Backend Service</option>
+                    <option value="E-commerce Platform">E-commerce Platform</option>
+                    <option value="Dashboard/Analytics">Dashboard/Analytics</option>
+                    <option value="Static Website">Static Website</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="targetAudience" class="form-label">Target Audience</label>
+                <input type="text" class="form-input" id="targetAudience" 
+                       value="{{ ai_data.target_audience if ai_data else (template_data.project_data.target_audience if template_data and template_data.project_data else '') }}"
+                       placeholder="Example: Small business owners, students">
+            </div>
+            
+            <div class="form-group">
+                <label for="timeline" class="form-label">Project Duration</label>
+                <select class="form-select" id="timeline">
+                    <option value="1-2 weeks">1-2 weeks</option>
+                    <option value="2-3 weeks">2-3 weeks</option>
+                    <option value="1-2 months">1-2 months</option>
+                    <option value="2-3 months">2-3 months</option>
+                    <option value="3-6 months">3-6 months</option>
+                    <option value="6+ months">6+ months</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="description" class="form-label">
+                Project Description <span class="text-red-500">*</span>
+            </label>
+            <textarea class="form-textarea" id="description" rows="4" 
+                      placeholder="Describe the purpose of your project, the problem it solves, and its key features" required
+                      >{{ ai_data.description if ai_data else (template_data.project_data.description if template_data and template_data.project_data else '') }}</textarea>
+        </div>
     </div>
-    <div class="card-body">
-        <form id="projectForm">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="projectName" class="form-label">Proje Adı *</label>
-                        <input type="text" class="form-control" id="projectName" 
-                               value="{{ ai_data.project_name if ai_data else (template_data.project_data.project_name if template_data and template_data.project_data else '') }}"
-                               placeholder="Projenizin adını girin" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="projectType" class="form-label">Proje Türü *</label>
-                        <select class="form-select" id="projectType" required>
-                            <option value="">Seçiniz...</option>
-                            <option value="Web Application">Web Application</option>
-                            <option value="Mobile App">Mobile App</option>
-                            <option value="Desktop Application">Desktop Application</option>
-                            <option value="API/Backend Service">API/Backend Service</option>
-                            <option value="Static Website">Static Website</option>
-                            <option value="E-commerce Platform">E-commerce Platform</option>
-                            <option value="Dashboard/Analytics">Dashboard/Analytics</option>
-                            <option value="Marketing Website">Marketing Website</option>
-                            <option value="Portfolio Website">Portfolio Website</option>
-                            <option value="Blog/CMS">Blog/CMS</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="timeline" class="form-label">Zaman Çizelgesi</label>
-                        <select class="form-select" id="timeline">
-                            <option value="1-2 hafta">1-2 hafta</option>
-                            <option value="2-3 hafta">2-3 hafta</option>
-                            <option value="1-2 ay">1-2 ay</option>
-                            <option value="2-3 ay">2-3 ay</option>
-                            <option value="3-6 ay">3-6 ay</option>
-                            <option value="6+ ay">6+ ay</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="targetAudience" class="form-label">Hedef Kitle</label>
-                        <input type="text" class="form-control" id="targetAudience" 
-                               value="{{ ai_data.target_audience if ai_data else (template_data.project_data.target_audience if template_data and template_data.project_data else '') }}"
-                               placeholder="Uygulamanızın hedef kullanıcı kitlesini tanımlayın">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="deploymentTarget" class="form-label">Deployment Hedefi</label>
-                        <select class="form-select" id="deploymentTarget">
-                            <option value="Vercel">Vercel</option>
-                            <option value="Netlify">Netlify</option>
-                            <option value="AWS">AWS</option>
-                            <option value="Google Cloud">Google Cloud</option>
-                            <option value="Azure">Azure</option>
-                            <option value="Heroku">Heroku</option>
-                            <option value="DigitalOcean">DigitalOcean</option>
-                            <option value="Self-hosted">Self-hosted</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="budgetRange" class="form-label">Bütçe Aralığı</label>
-                        <select class="form-select" id="budgetRange">
-                            <option value="Kişisel proje">Kişisel proje</option>
-                            <option value="Küçük bütçe (< $1K)">Küçük bütçe (< $1K)</option>
-                            <option value="Orta bütçe ($1K - $10K)">Orta bütçe ($1K - $10K)</option>
-                            <option value="Büyük bütçe ($10K+)">Büyük bütçe ($10K+)</option>
-                            <option value="Kurumsal proje">Kurumsal proje</option>
-                        </select>
-                    </div>
-                </div>
+    
+    <!-- Goals & Deployment -->
+    <div class="content-section">
+        <h2 class="text-xl font-semibold mb-4">Goals & Deployment</h2>
+        
+        <div class="form-group">
+            <label for="mainGoals" class="form-label">Main Goals</label>
+            <textarea class="form-textarea" id="mainGoals" rows="3" 
+                      placeholder="Write one goal per line:&#10;- Improve user experience&#10;- Increase sales by 20%&#10;- Strengthen automation"
+                      >{% if ai_data and ai_data.main_goals %}{{ ai_data.main_goals|join('\n') }}{% elif template_data and template_data.project_data and template_data.project_data.main_goals %}{{ template_data.project_data.main_goals|join('\n') }}{% endif %}</textarea>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="form-group">
+                <label for="deploymentTarget" class="form-label">Deployment Platform</label>
+                <select class="form-select" id="deploymentTarget">
+                    <option value="Vercel">Vercel</option>
+                    <option value="Netlify">Netlify</option>
+                    <option value="AWS">AWS</option>
+                    <option value="Google Cloud">Google Cloud</option>
+                    <option value="Azure">Azure</option>
+                    <option value="Heroku">Heroku</option>
+                    <option value="Self-hosted">Self-hosted</option>
+                    <option value="Other">Other</option>
+                </select>
             </div>
             
-            <div class="mb-3">
-                <label for="description" class="form-label">Proje Açıklaması *</label>
-                <textarea class="form-control" id="description" rows="4" 
-                          placeholder="Projenizin ne yaptığını ve amacını detaylı olarak açıklayın" required
-                          >{{ ai_data.description if ai_data else (template_data.project_data.description if template_data and template_data.project_data else '') }}</textarea>
+            <div class="form-group">
+                <label for="budgetRange" class="form-label">Budget Range</label>
+                <select class="form-select" id="budgetRange">
+                    <option value="Personal project">Personal project</option>
+                    <option value="Small budget (< $1K)">Small budget (< $1K)</option>
+                    <option value="Medium budget ($1K - $10K)">Medium budget ($1K - $10K)</option>
+                    <option value="Large budget ($10K+)">Large budget ($10K+)</option>
+                    <option value="Corporate project">Corporate project</option>
+                </select>
             </div>
-            
-            <div class="mb-3">
-                <label for="mainGoals" class="form-label">Ana Hedefler</label>
-                <textarea class="form-control" id="mainGoals" rows="4" 
-                          placeholder="Projenizin ana hedeflerini listeleyin (her satıra bir hedef)"
-                          >{% if ai_data and ai_data.main_goals %}{{ ai_data.main_goals|join('\n') }}{% elif template_data and template_data.project_data and template_data.project_data.main_goals %}{{ template_data.project_data.main_goals|join('\n') }}{% endif %}</textarea>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Teknoloji Stack</label>
-                <div class="row" id="techStack">
-                    <!-- Frontend -->
-                    <div class="col-md-2">
-                        <h6>Frontend</h6>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="React" id="tech_React">
-                            <label class="form-check-label" for="tech_React">React</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="Vue.js" id="tech_Vue">
-                            <label class="form-check-label" for="tech_Vue">Vue.js</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="Angular" id="tech_Angular">
-                            <label class="form-check-label" for="tech_Angular">Angular</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="Next.js" id="tech_Next">
-                            <label class="form-check-label" for="tech_Next">Next.js</label>
-                        </div>
-                    </div>
-                    
-                    <!-- Backend -->
-                    <div class="col-md-2">
-                        <h6>Backend</h6>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="Node.js" id="tech_Node">
-                            <label class="form-check-label" for="tech_Node">Node.js</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="Python" id="tech_Python">
-                            <label class="form-check-label" for="tech_Python">Python</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="Java" id="tech_Java">
-                            <label class="form-check-label" for="tech_Java">Java</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="C#" id="tech_CSharp">
-                            <label class="form-check-label" for="tech_CSharp">C#</label>
-                        </div>
-                    </div>
-                    
-                    <!-- Database -->
-                    <div class="col-md-2">
-                        <h6>Database</h6>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="PostgreSQL" id="tech_PostgreSQL">
-                            <label class="form-check-label" for="tech_PostgreSQL">PostgreSQL</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="MySQL" id="tech_MySQL">
-                            <label class="form-check-label" for="tech_MySQL">MySQL</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="MongoDB" id="tech_MongoDB">
-                            <label class="form-check-label" for="tech_MongoDB">MongoDB</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="Firebase" id="tech_Firebase">
-                            <label class="form-check-label" for="tech_Firebase">Firebase</label>
-                        </div>
-                    </div>
-                    
-                    <!-- Styling -->
-                    <div class="col-md-3">
-                        <h6>Styling</h6>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="Tailwind CSS" id="tech_Tailwind">
-                            <label class="form-check-label" for="tech_Tailwind">Tailwind CSS</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="Bootstrap" id="tech_Bootstrap">
-                            <label class="form-check-label" for="tech_Bootstrap">Bootstrap</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="Styled Components" id="tech_StyledComponents">
-                            <label class="form-check-label" for="tech_StyledComponents">Styled Components</label>
-                        </div>
-                    </div>
-                    
-                    <!-- Cloud -->
-                    <div class="col-md-3">
-                        <h6>Cloud</h6>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="AWS" id="tech_AWS">
-                            <label class="form-check-label" for="tech_AWS">AWS</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="Google Cloud" id="tech_GCP">
-                            <label class="form-check-label" for="tech_GCP">Google Cloud</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="Azure" id="tech_Azure">
-                            <label class="form-check-label" for="tech_Azure">Azure</label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-3">
-                    <label for="customTech" class="form-label">Diğer Teknolojiler</label>
-                    <input type="text" class="form-control" id="customTech" 
-                           placeholder="Listede olmayan teknolojileri virgülle ayırarak girin">
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-4">
-                    <a href="/" class="btn btn-outline-secondary w-100">
-                        <i class="fas fa-arrow-left me-2"></i>Geri
-                    </a>
-                </div>
-                <div class="col-md-4"></div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-arrow-right me-2"></i>Devam Et
-                    </button>
-                </div>
-            </div>
-        </form>
+        </div>
     </div>
-</div>
+    
+    <!-- Technology Stack -->
+    <div class="content-section">
+        <h2 class="text-xl font-semibold mb-4">Technology Stack</h2>
+        <p class="text-gray-600 mb-4">Select the technologies you plan to use</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="techStack">
+            <!-- Frontend -->
+            <div>
+                <h3 class="font-medium text-gray-700 mb-3">Frontend</h3>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="React" id="tech_React" class="rounded border-gray-300">
+                        <span>React</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Vue.js" id="tech_Vue" class="rounded border-gray-300">
+                        <span>Vue.js</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Angular" id="tech_Angular" class="rounded border-gray-300">
+                        <span>Angular</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Next.js" id="tech_Next" class="rounded border-gray-300">
+                        <span>Next.js</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Backend -->
+            <div>
+                <h3 class="font-medium text-gray-700 mb-3">Backend</h3>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Node.js" id="tech_Node" class="rounded border-gray-300">
+                        <span>Node.js</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Python" id="tech_Python" class="rounded border-gray-300">
+                        <span>Python</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Java" id="tech_Java" class="rounded border-gray-300">
+                        <span>Java</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Go" id="tech_Go" class="rounded border-gray-300">
+                        <span>Go</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Database -->
+            <div>
+                <h3 class="font-medium text-gray-700 mb-3">Database</h3>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="PostgreSQL" id="tech_PostgreSQL" class="rounded border-gray-300">
+                        <span>PostgreSQL</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="MySQL" id="tech_MySQL" class="rounded border-gray-300">
+                        <span>MySQL</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="MongoDB" id="tech_MongoDB" class="rounded border-gray-300">
+                        <span>MongoDB</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Firebase" id="tech_Firebase" class="rounded border-gray-300">
+                        <span>Firebase</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Styling -->
+            <div>
+                <h3 class="font-medium text-gray-700 mb-3">Styling</h3>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Tailwind CSS" id="tech_Tailwind" class="rounded border-gray-300">
+                        <span>Tailwind CSS</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Bootstrap" id="tech_Bootstrap" class="rounded border-gray-300">
+                        <span>Bootstrap</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Material UI" id="tech_MaterialUI" class="rounded border-gray-300">
+                        <span>Material UI</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Chakra UI" id="tech_ChakraUI" class="rounded border-gray-300">
+                        <span>Chakra UI</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Cloud Services -->
+            <div>
+                <h3 class="font-medium text-gray-700 mb-3">Cloud Services</h3>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="AWS" id="tech_AWS" class="rounded border-gray-300">
+                        <span>AWS</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Google Cloud" id="tech_GCP" class="rounded border-gray-300">
+                        <span>Google Cloud</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Azure" id="tech_Azure" class="rounded border-gray-300">
+                        <span>Azure</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" value="Supabase" id="tech_Supabase" class="rounded border-gray-300">
+                        <span>Supabase</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Other -->
+            <div>
+                <h3 class="font-medium text-gray-700 mb-3">Other</h3>
+                <div class="form-group">
+                    <input type="text" class="form-input text-sm" id="customTech" 
+                           placeholder="Docker, Redis, GraphQL...">
+                    <p class="text-xs text-gray-500 mt-1">Separate with commas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Form Actions -->
+    <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+        <a href="/" class="btn btn-secondary">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back
+        </a>
+        
+        <button type="submit" class="btn btn-primary">
+            Continue
+            <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+    </div>
+</form>
+
+<style>
+    input[type="checkbox"] {
+        width: 1rem;
+        height: 1rem;
+        cursor: pointer;
+    }
+    
+    input[type="checkbox"]:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -285,12 +329,12 @@
 <script id="ai-data" type="application/json">{{ session.ai_filled_data|tojson|safe }}</script>
 {% endif %}
 
-{% if session.template_data and session.template_data.project_data %}
-<script id="template-data" type="application/json">{{ session.template_data.project_data|tojson|safe }}</script>
+{% if session.selected_template and templates[session.selected_template] %}
+<script id="template-data" type="application/json">{{ templates[session.selected_template]|tojson|safe }}</script>
 {% endif %}
 
 <script>
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     // AI'dan gelen verileri form'a doldur
     const aiDataElement = document.getElementById('ai-data');
     if (aiDataElement) {
@@ -302,50 +346,63 @@ $(document).ready(function() {
     const templateDataElement = document.getElementById('template-data');
     if (templateDataElement) {
         const templateData = JSON.parse(templateDataElement.textContent);
-        fillFormWithTemplateData(templateData);
+        if (templateData.project_data) {
+            fillFormWithTemplateData(templateData.project_data);
+        }
     }
     
     // AI ile form doldurma
-    $('#aiFillBtn').click(function() {
-        const description = $('#aiDescription').val().trim();
-        
+    document.getElementById('aiFillBtn').addEventListener('click', function() {
+        const btn = this;
+        const description = document.getElementById('aiDescription').value.trim();
         if (!description) {
-            showAlert('warning', 'Önce proje açıklamasını girin!');
+            showAlert('error', 'Please enter a project description first.');
             return;
         }
-        
-        const button = $(this);
-        showLoading(button);
-        
+
+        setLoading(btn, true);
+
         fetch('/api/ai-fill-form', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ description: description })
         })
         .then(response => response.json())
         .then(data => {
-            hideLoading(button);
-            
-            if (data.success) {
-                showAlert('success', data.message);
-                fillFormWithAiData(data.data);
-                $('#clearAiBtn').prop('disabled', false);
+            setLoading(btn, false);
+            if (data.success && data.filled_data) {
+                const filled = data.filled_data;
+                document.getElementById('projectName').value = filled.project_name || '';
+                document.getElementById('projectType').value = filled.project_type || '';
+                document.getElementById('targetAudience').value = filled.target_audience || '';
+                document.getElementById('timeline').value = filled.timeline || '';
+                document.getElementById('deploymentTarget').value = filled.deployment_target || '';
+                document.getElementById('budgetRange').value = filled.budget_range || '';
+                document.getElementById('description').value = filled.description || '';
+                document.getElementById('aiDescription').value = filled.description || '';  // Sync with AI description field
+                document.getElementById('mainGoals').value = filled.main_goals ? filled.main_goals.join('\n') : '';
+
+                // Tech stack checkboxes
+                const techStack = filled.tech_stack || [];
+                document.querySelectorAll('#techStack input[type=checkbox]').forEach(checkbox => {
+                    checkbox.checked = techStack.includes(checkbox.value);
+                });
+
+                showAlert('success', 'Form filled successfully with AI!');
             } else {
-                showAlert('danger', data.error);
+                showAlert('error', data.error || 'Failed to fill form with AI.');
             }
         })
         .catch(error => {
-            hideLoading(button);
-            showAlert('danger', 'AI doldurma hatası: ' + error);
+            setLoading(btn, false);
+            showAlert('error', 'Error: ' + error.message);
         });
     });
     
     // AI verilerini temizle
-    $('#clearAiBtn').click(function() {
-        const button = $(this);
-        showLoading(button);
+    function clearAiData() {
+        const button = this;
+        setLoading(button, true);
         
         fetch('/api/clear-ai-data', {
             method: 'POST',
@@ -356,45 +413,55 @@ $(document).ready(function() {
         })
         .then(response => response.json())
         .then(data => {
-            hideLoading(button);
+            setLoading(button, false);
             
             if (data.success) {
                 showAlert('success', data.message);
                 clearForm();
-                button.prop('disabled', true);
+                button.remove();
             } else {
-                showAlert('danger', data.error);
+                showAlert('error', data.error);
             }
         })
         .catch(error => {
-            hideLoading(button);
-            showAlert('danger', 'Temizleme hatası: ' + error);
+            setLoading(button, false);
+            showAlert('error', 'Cleaning error: ' + error);
         });
-    });
+    }
+    
+    // Clear button varsa event listener ekle
+    const clearBtn = document.getElementById('clearAiBtn');
+    if (clearBtn) {
+        clearBtn.onclick = clearAiData;
+    }
     
     // Form submit
-    $('#projectForm').submit(function(e) {
+    document.getElementById('projectForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
         // Form verilerini topla
         const formData = {
-            project_name: $('#projectName').val(),
-            project_type: $('#projectType').val(),
-            description: $('#description').val(),
-            target_audience: $('#targetAudience').val(),
-            timeline: $('#timeline').val(),
-            deployment_target: $('#deploymentTarget').val(),
-            budget_range: $('#budgetRange').val(),
-            main_goals: $('#mainGoals').val().split('\n').filter(goal => goal.trim()),
+            project_name: document.getElementById('projectName').value,
+            project_type: document.getElementById('projectType').value,
+            description: document.getElementById('description').value,
+            target_audience: document.getElementById('targetAudience').value,
+            timeline: document.getElementById('timeline').value,
+            deployment_target: document.getElementById('deploymentTarget').value,
+            budget_range: document.getElementById('budgetRange').value,
+            main_goals: document.getElementById('mainGoals').value.split('\n').filter(goal => goal.trim()),
             tech_stack: getSelectedTechnologies(),
-            custom_tech: $('#customTech').val()
+            custom_tech: document.getElementById('customTech').value
         };
         
         // Validasyon
         if (!formData.project_name || !formData.project_type || !formData.description) {
-            showAlert('warning', 'Proje adı, türü ve açıklaması zorunludur!');
+            showAlert('error', 'Project name, type, and description are required!');
             return;
         }
+        
+        // Submit button'u bul ve loading yap
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        setLoading(submitBtn, true);
         
         // Kaydet
         fetch('/api/save-project', {
@@ -406,6 +473,8 @@ $(document).ready(function() {
         })
         .then(response => response.json())
         .then(data => {
+            setLoading(submitBtn, false);
+            
             if (data.success) {
                 showAlert('success', data.message);
                 // Gereksinimler sayfasına yönlendir
@@ -413,61 +482,113 @@ $(document).ready(function() {
                     window.location.href = '/requirements';
                 }, 1000);
             } else {
-                showAlert('danger', data.error);
+                showAlert('error', data.error);
             }
         })
         .catch(error => {
-            showAlert('danger', 'Kaydetme hatası: ' + error);
+            setLoading(submitBtn, false);
+            showAlert('error', 'Save error: ' + error);
         });
     });
     
     // Yardımcı fonksiyonlar
     function fillFormWithAiData(data) {
-        if (data.project_name) $('#projectName').val(data.project_name);
-        if (data.project_type) $('#projectType').val(data.project_type);
-        if (data.target_audience) $('#targetAudience').val(data.target_audience);
-        if (data.timeline) $('#timeline').val(data.timeline);
-        if (data.deployment_target) $('#deploymentTarget').val(data.deployment_target);
-        if (data.budget_range) $('#budgetRange').val(data.budget_range);
-        if (data.description) $('#description').val(data.description);
-        if (data.main_goals) $('#mainGoals').val(data.main_goals.join('\n'));
+        if (data.project_name) document.getElementById('projectName').value = data.project_name;
+        if (data.project_type) document.getElementById('projectType').value = data.project_type;
+        if (data.target_audience) document.getElementById('targetAudience').value = data.target_audience;
+        if (data.timeline) document.getElementById('timeline').value = data.timeline;
+        if (data.deployment_target) document.getElementById('deploymentTarget').value = data.deployment_target;
+        if (data.budget_range) document.getElementById('budgetRange').value = data.budget_range;
+        if (data.description) document.getElementById('description').value = data.description;
+        if (data.main_goals) document.getElementById('mainGoals').value = data.main_goals.join('\n');
         if (data.tech_stack) setSelectedTechnologies(data.tech_stack);
     }
     
     function fillFormWithTemplateData(data) {
-        if (data.project_name) $('#projectName').val(data.project_name);
-        if (data.project_type) $('#projectType').val(data.project_type);
-        if (data.target_audience) $('#targetAudience').val(data.target_audience);
-        if (data.timeline) $('#timeline').val(data.timeline);
-        if (data.deployment_target) $('#deploymentTarget').val(data.deployment_target);
-        if (data.budget_range) $('#budgetRange').val(data.budget_range);
-        if (data.description) $('#description').val(data.description);
-        if (data.main_goals) $('#mainGoals').val(data.main_goals.join('\n'));
+        if (data.project_name) document.getElementById('projectName').value = data.project_name;
+        if (data.project_type) document.getElementById('projectType').value = data.project_type;
+        if (data.target_audience) document.getElementById('targetAudience').value = data.target_audience;
+        if (data.timeline) document.getElementById('timeline').value = data.timeline;
+        if (data.deployment_target) document.getElementById('deploymentTarget').value = data.deployment_target;
+        if (data.budget_range) document.getElementById('budgetRange').value = data.budget_range;
+        if (data.description) document.getElementById('description').value = data.description;
+        if (data.main_goals) document.getElementById('mainGoals').value = data.main_goals.join('\n');
         if (data.tech_stack) setSelectedTechnologies(data.tech_stack);
     }
     
     function getSelectedTechnologies() {
         const selected = [];
-        $('#techStack input[type="checkbox"]:checked').each(function() {
-            selected.push($(this).val());
+        document.querySelectorAll('#techStack input[type="checkbox"]:checked').forEach(checkbox => {
+            selected.push(checkbox.value);
         });
+        
+        // Custom tech ekle
+        const customTech = document.getElementById('customTech').value.trim();
+        if (customTech) {
+            customTech.split(',').forEach(tech => {
+                const trimmed = tech.trim();
+                if (trimmed) selected.push(trimmed);
+            });
+        }
+        
         return selected;
     }
     
     function setSelectedTechnologies(techList) {
         // Önce tümünü temizle
-        $('#techStack input[type="checkbox"]').prop('checked', false);
+        document.querySelectorAll('#techStack input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
         
         // Seçilenleri işaretle
         techList.forEach(tech => {
-            $('#techStack input[value="' + tech + '"]').prop('checked', true);
+            const checkbox = document.querySelector(`#techStack input[value="${tech}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
         });
     }
     
     function clearForm() {
-        $('#projectForm')[0].reset();
-        $('#techStack input[type="checkbox"]').prop('checked', false);
+        document.getElementById('projectForm').reset();
+        document.querySelectorAll('#techStack input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
     }
+
+    const expandBtn = document.getElementById('expandDescriptionBtn');
+    const aiDescription = document.getElementById('aiDescription');
+
+    expandBtn.addEventListener('click', function() {
+        const description = aiDescription.value.trim();
+        if (!description) {
+            showAlert('error', 'Please enter a project description first.');
+            return;
+        }
+
+        setLoading(expandBtn, true);
+
+        fetch('/api/expand-description', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ description: description })
+        })
+        .then(response => response.json())
+        .then(data => {
+            setLoading(expandBtn, false);
+            if (data.success) {
+                aiDescription.value = data.expanded_description;
+                document.getElementById('description').value = data.expanded_description; // Sync with main project description
+                showAlert('success', 'Description expanded successfully!');
+            } else {
+                showAlert('error', data.error || 'Failed to expand description.');
+            }
+        })
+        .catch(error => {
+            setLoading(expandBtn, false);
+            showAlert('error', 'Error: ' + error.message);
+        });
+    });
 });
 </script>
 {% endblock %} 

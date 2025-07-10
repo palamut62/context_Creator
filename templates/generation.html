@@ -1,183 +1,223 @@
 {% extends "base.html" %}
 
-{% block title %}PRP Üretimi - Context Engineering PRP Generator{% endblock %}
+{% block title %}PRP Generation - Context Engineering PRP Generator{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header">
-        <h4><i class="fas fa-robot me-2"></i>PRP Üretimi</h4>
-        <p class="text-muted mb-0">Proje bilgileriniz kullanılarak PRP dosyası oluşturuluyor</p>
+<!-- Page Header -->
+<div class="content-section">
+    <h1 class="section-title">PRP Generation</h1>
+    <p class="section-description">
+        Your project information is used to create a PRP file in Context Engineering standards.
+    </p>
+</div>
+
+<!-- Project Summary -->
+<div class="content-section">
+    <h2 class="text-xl font-semibold mb-4">📋 Project Summary</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="message">
+            <h3 class="font-medium mb-3">Project Information</h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Project Name:</span>
+                    <span class="font-medium">{{ session.project_data.project_name or 'Not Specified' }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Project Type:</span>
+                    <span class="font-medium">{{ session.project_data.project_type or 'Not Specified' }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Deployment Target:</span>
+                    <span class="font-medium">{{ session.project_data.deployment_target or 'Not Specified' }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Duration:</span>
+                    <span class="font-medium">{{ session.project_data.timeline or 'Not Specified' }}</span>
+                </div>
     </div>
-    <div class="card-body">
-        <!-- Proje Özeti -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card border-primary">
-                    <div class="card-header bg-primary text-white">
-                        <h6><i class="fas fa-info-circle me-2"></i>Proje Özeti</h6>
                     </div>
-                    <div class="card-body">
-                        <p><strong>Proje Adı:</strong> {{ session.project_data.project_name or 'Belirtilmemiş' }}</p>
-                        <p><strong>Proje Türü:</strong> {{ session.project_data.project_type or 'Belirtilmemiş' }}</p>
-                        <p><strong>Teknoloji Stack:</strong> 
+        
+        <div class="message">
+            <h3 class="font-medium mb-3">Technology Stack</h3>
+            <div class="flex flex-wrap gap-2">
                             {% if session.project_data.tech_stack %}
                                 {% if session.project_data.tech_stack is string %}
+                        <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
                                     {{ session.project_data.tech_stack }}
+                        </span>
                                 {% else %}
-                                    {{ session.project_data.tech_stack|join(', ') }}
+                        {% for tech in session.project_data.tech_stack %}
+                        <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                            {{ tech }}
+                        </span>
+                        {% endfor %}
                                 {% endif %}
                             {% else %}
-                                Belirtilmemiş
+                    <span class="text-gray-500 text-sm">Technology not specified</span>
                             {% endif %}
-                        </p>
-                        <p><strong>Hedef Platform:</strong> {{ session.project_data.deployment_target or 'Belirtilmemiş' }}</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card border-success">
-                    <div class="card-header bg-success text-white">
-                        <h6><i class="fas fa-check-circle me-2"></i>Üretim Ayarları</h6>
                     </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label for="outputFormat" class="form-label">Çıktı Formatı</label>
-                            <select class="form-select" id="outputFormat">
-                                <option value="markdown">Markdown (.md)</option>
-                                <option value="txt">Plain Text (.txt)</option>
-                                <option value="json">JSON (.json)</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="detailLevel" class="form-label">Detay Seviyesi</label>
+
+<!-- Generation Settings -->
+<div class="content-section">
+    <h2 class="text-xl font-semibold mb-4">⚙️ Generation Settings</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-group">
+                            <label for="detailLevel" class="form-label">Detail Level</label>
                             <select class="form-select" id="detailLevel">
-                                <option value="basic">Temel - Hızlı PRP</option>
-                                <option value="detailed" selected>Detaylı - Standart PRP</option>
-                                <option value="comprehensive">Kapsamlı - Sample PRP Formatı</option>
+                                <option value="basic">Basic - Fast PRP</option>
+                                <option value="detailed" selected>Detailed - Standard PRP</option>
+                                <option value="comprehensive">Comprehensive - Sample PRP Format</option>
                             </select>
-                            <small class="text-muted">Kapsamlı format sample_prp.md gibi tüm bölümleri içerir</small>
+            <p class="text-xs text-gray-500 mt-1">Comprehensive format includes all sections</p>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="includeExamples" checked>
-                            <label class="form-check-label" for="includeExamples">
-                                Örnekler dahil et
+        
+        <div class="form-group">
+            <label class="form-label">Additional Options</label>
+            <div class="space-y-2">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="includeExamples" checked class="rounded border-gray-300">
+                    <span class="text-sm">Include code examples</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="includeArchitecture" checked class="rounded border-gray-300">
+                    <span class="text-sm">Add architectural diagrams</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="includeTestPlan" checked class="rounded border-gray-300">
+                    <span class="text-sm">Create a test plan</span>
                             </label>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Üretim Durumu -->
-        <div class="card mb-4" id="generationStatus" style="display: none;">
-            <div class="card-header">
-                <h6><i class="fas fa-cogs me-2"></i>Üretim Durumu</h6>
+<!-- Generation Status -->
+<div class="content-section" id="generationStatus" style="display: none;">
+    <h2 class="text-xl font-semibold mb-4">🚀 Generation Status</h2>
+    
+    <div class="message">
+        <div class="mb-4">
+            <div class="progress-bar">
+                <div class="progress-fill" id="generationProgress" style="width: 0%"></div>
             </div>
-            <div class="card-body">
-                <div class="progress mb-3">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                         role="progressbar" id="generationProgress" style="width: 0%"></div>
+            <p class="text-xs text-gray-500 mt-1" id="progressText">Starting...</p>
+        </div>
+
+        <div class="space-y-3" id="generationSteps">
+            <div class="flex items-center gap-3" id="step1">
+                <div class="spinner" id="step1-icon"></div>
+                <span class="text-sm">Analyzing project data...</span>
+            </div>
+            <div class="flex items-center gap-3 opacity-50" id="step2">
+                <i class="fas fa-circle text-gray-300 text-xs" id="step2-icon"></i>
+                <span class="text-sm">AI team coordinating...</span>
                 </div>
-                <div id="generationSteps">
-                    <div class="d-flex align-items-center mb-2" id="step1">
-                        <div class="spinner-border spinner-border-sm me-2"></div>
-                        <span>Proje verileri analiz ediliyor...</span>
+            <div class="flex items-center gap-3 opacity-50" id="step3">
+                <i class="fas fa-circle text-gray-300 text-xs" id="step3-icon"></i>
+                <span class="text-sm">Generating PRP content...</span>
                     </div>
-                    <div class="d-flex align-items-center mb-2" id="step2" style="display: none;">
-                        <div class="spinner-border spinner-border-sm me-2"></div>
-                        <span>PRP şablonu oluşturuluyor...</span>
-                    </div>
-                    <div class="d-flex align-items-center mb-2" id="step3" style="display: none;">
-                        <div class="spinner-border spinner-border-sm me-2"></div>
-                        <span>İçerik üretiliyor...</span>
-                    </div>
-                    <div class="d-flex align-items-center mb-2" id="step4" style="display: none;">
-                        <div class="spinner-border spinner-border-sm me-2"></div>
-                        <span>Dosya hazırlanıyor...</span>
-                    </div>
-                </div>
+            <div class="flex items-center gap-3 opacity-50" id="step4">
+                <i class="fas fa-circle text-gray-300 text-xs" id="step4-icon"></i>
+                <span class="text-sm">Quality control...</span>
+            </div>
+            <div class="flex items-center gap-3 opacity-50" id="step5">
+                <i class="fas fa-circle text-gray-300 text-xs" id="step5-icon"></i>
+                <span class="text-sm">Preparing file...</span>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Hata Mesajları -->
-        <div class="alert alert-danger" id="errorAlert" style="display: none;">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <span id="errorMessage"></span>
-        </div>
+<!-- Action Buttons -->
+<div class="flex justify-between items-center pt-6 border-t border-gray-200">
+    <a href="/requirements" class="btn btn-secondary">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Back
+    </a>
+    
+    <div class="flex gap-3">
+        <button type="button" class="btn btn-primary" id="generateBtn">
+            <i class="fas fa-magic mr-2"></i>
+            Generate PRP
+        </button>
+        <button type="button" class="btn btn-secondary" id="previewBtn" style="display: none;">
+            <i class="fas fa-eye mr-2"></i>
+            Preview
+        </button>
+        <a href="/results" class="btn btn-success" id="viewResultsBtn" style="display: none;">
+            <i class="fas fa-check mr-2"></i>
+            View Results
+        </a>
+    </div>
+</div>
 
-        <!-- Başarı Mesajı -->
-        <div class="alert alert-success" id="successAlert" style="display: none;">
-            <i class="fas fa-check-circle me-2"></i>
-            <span id="successMessage"></span>
-        </div>
-
-        <!-- Üretim Butonları -->
-        <div class="d-flex justify-content-between">
-            <a href="/requirements" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Önceki Adım
-            </a>
-            <div>
-                <button type="button" class="btn btn-primary me-2" id="generateBtn">
-                    <i class="fas fa-magic me-2"></i>PRP Üret
+<!-- Preview Modal -->
+<div id="previewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-lg font-semibold">PRP Preview</h3>
+                <button onclick="closePreview()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
                 </button>
-                <button type="button" class="btn btn-outline-primary" id="previewBtn" style="display: none;">
-                    <i class="fas fa-eye me-2"></i>Önizleme
+            </div>
+            <div class="flex-1 overflow-y-auto p-4">
+                <pre id="previewContent" class="bg-gray-50 p-4 rounded text-sm font-mono whitespace-pre-wrap"></pre>
+            </div>
+            <div class="flex justify-end gap-3 p-4 border-t">
+                <button onclick="closePreview()" class="btn btn-secondary">
+                    Close
+                </button>
+                <button onclick="downloadPRP()" class="btn btn-primary">
+                    <i class="fas fa-download mr-2"></i>
+                    Download
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Önizleme Modal -->
-<div class="modal fade" id="previewModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">PRP Önizleme</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <pre id="previewContent" class="bg-light p-3" style="max-height: 600px; overflow-y: auto;"></pre>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
-                <button type="button" class="btn btn-primary" id="downloadBtn">
-                    <i class="fas fa-download me-2"></i>İndir
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+    #generationProgress {
+        transition: width 0.5s ease;
+    }
+    
+    .step-complete {
+        color: var(--success-color);
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-$(document).ready(function() {
     let generatedContent = '';
     let currentFormat = 'markdown';
     
+document.addEventListener('DOMContentLoaded', function() {
     // PRP üret
-    $('#generateBtn').click(function() {
-        const btn = $(this);
-        const originalText = btn.html();
+    document.getElementById('generateBtn').addEventListener('click', function() {
+        const button = this;
         
         // Ayarları al
         const settings = {
-            output_format: $('#outputFormat').val(),
-            detail_level: $('#detailLevel').val(),
-            include_examples: $('#includeExamples').is(':checked')
+            detail_level: document.getElementById('detailLevel').value,
+            include_examples: document.getElementById('includeExamples').checked,
+            include_architecture: document.getElementById('includeArchitecture').checked,
+            include_test_plan: document.getElementById('includeTestPlan').checked
         };
         
-        currentFormat = settings.output_format;
-        
         // UI güncelleme
-        btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Üretiliyor...');
-        btn.prop('disabled', true);
-        $('#generationStatus').show();
-        $('#errorAlert').hide();
-        $('#successAlert').hide();
+        setLoading(button, true);
+        document.getElementById('generationStatus').style.display = 'block';
+        document.getElementById('previewBtn').style.display = 'none';
+        document.getElementById('viewResultsBtn').style.display = 'none';
         
-        // Üretim süreci simülasyonu
+        // Üretim süreci simülasyonu başlat
         simulateGeneration().then(() => {
             // Gerçek API çağrısı
             fetch('/api/generate-prp', {
@@ -189,47 +229,118 @@ $(document).ready(function() {
             })
             .then(response => response.json())
             .then(data => {
-                btn.html(originalText);
-                btn.prop('disabled', false);
+                setLoading(button, false);
                 
                 if (data.success) {
                     generatedContent = data.content;
-                    $('#successAlert').show();
-                    $('#successMessage').text('PRP başarıyla üretildi!');
-                    $('#previewBtn').show();
+                    showAlert('success', 'PRP successfully generated!');
+                    document.getElementById('previewBtn').style.display = 'inline-flex';
+                    document.getElementById('viewResultsBtn').style.display = 'inline-flex';
                     
-                    // Sonraki adıma geç butonu ekle
-                    $('.d-flex.justify-content-between').append(`
-                        <a href="/results" class="btn btn-success">
-                            <i class="fas fa-arrow-right me-2"></i>Sonuçları Görüntüle
-                        </a>
-                    `);
+                    // Son adımı tamamla
+                    completeStep(5);
+                    document.getElementById('progressText').textContent = 'Completed!';
                 } else {
-                    $('#errorAlert').show();
-                    $('#errorMessage').text(data.error || 'Bilinmeyen hata oluştu');
+                    showAlert('error', data.error || 'Unknown error occurred');
+                    resetGeneration();
                 }
             })
             .catch(error => {
-                btn.html(originalText);
-                btn.prop('disabled', false);
-                $('#errorAlert').show();
-                $('#errorMessage').text('Üretim hatası: ' + error);
+                setLoading(button, false);
+                showAlert('error', 'Generation error: ' + error);
+                resetGeneration();
             });
         });
     });
     
     // Önizleme
-    $('#previewBtn').click(function() {
+    document.getElementById('previewBtn').addEventListener('click', function() {
         if (generatedContent) {
-            $('#previewContent').text(generatedContent);
-            $('#previewModal').modal('show');
+            document.getElementById('previewContent').textContent = generatedContent;
+            document.getElementById('previewModal').classList.remove('hidden');
         }
     });
+});
+
+// Üretim süreci simülasyonu
+async function simulateGeneration() {
+    const steps = [
+        { id: 1, text: 'Analyzing project data...', duration: 1500 },
+        { id: 2, text: 'AI team coordinating...', duration: 2000 },
+        { id: 3, text: 'Generating PRP content...', duration: 3000 },
+        { id: 4, text: 'Quality control...', duration: 1500 }
+    ];
     
-    // İndir
-    $('#downloadBtn').click(function() {
+    for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        
+        // Önceki adımı tamamla
+        if (i > 0) {
+            completeStep(steps[i-1].id);
+        }
+        
+        // Mevcut adımı aktif et
+        activateStep(step.id);
+        document.getElementById('progressText').textContent = step.text;
+        
+        // Progress güncelle
+        const progress = ((i + 1) / (steps.length + 1)) * 100;
+        document.getElementById('generationProgress').style.width = progress + '%';
+        
+        // Bekleme süresi
+        await new Promise(resolve => setTimeout(resolve, step.duration));
+        }
+    
+    // Son adım için hazırla
+    completeStep(4);
+    activateStep(5);
+    document.getElementById('progressText').textContent = 'Preparing file...';
+    document.getElementById('generationProgress').style.width = '90%';
+}
+
+// Adımı aktif et
+function activateStep(stepId) {
+    const step = document.getElementById(`step${stepId}`);
+    const icon = document.getElementById(`step${stepId}-icon`);
+    
+    step.classList.remove('opacity-50');
+    icon.className = 'spinner';
+}
+
+// Adımı tamamla
+function completeStep(stepId) {
+    const icon = document.getElementById(`step${stepId}-icon`);
+    icon.className = 'fas fa-check-circle text-green-600';
+    document.getElementById('generationProgress').style.width = '100%';
+}
+
+// Üretimi sıfırla
+function resetGeneration() {
+    for (let i = 1; i <= 5; i++) {
+        const step = document.getElementById(`step${i}`);
+        const icon = document.getElementById(`step${i}-icon`);
+        
+        if (i === 1) {
+            step.classList.remove('opacity-50');
+            icon.className = 'fas fa-circle text-gray-300 text-xs';
+        } else {
+            step.classList.add('opacity-50');
+            icon.className = 'fas fa-circle text-gray-300 text-xs';
+        }
+    }
+    
+    document.getElementById('generationProgress').style.width = '0%';
+    document.getElementById('progressText').textContent = 'Starting...';
+}
+
+// Modal fonksiyonları
+function closePreview() {
+    document.getElementById('previewModal').classList.add('hidden');
+}
+
+function downloadPRP() {
         if (generatedContent) {
-            const fileName = `prp_${Date.now()}.${currentFormat === 'markdown' ? 'md' : currentFormat}`;
+        const fileName = `prp_${Date.now()}.md`;
             const blob = new Blob([generatedContent], { type: 'text/plain' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -237,35 +348,15 @@ $(document).ready(function() {
             a.download = fileName;
             a.click();
             window.URL.revokeObjectURL(url);
-        }
-    });
-    
-    // Üretim süreci simülasyonu
-    async function simulateGeneration() {
-        const steps = ['step1', 'step2', 'step3', 'step4'];
-        const progressValues = [25, 50, 75, 100];
         
-        for (let i = 0; i < steps.length; i++) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Önceki adımı tamamla
-            if (i > 0) {
-                const prevStep = $('#' + steps[i-1]);
-                prevStep.find('.spinner-border').removeClass('spinner-border').addClass('text-success').html('<i class="fas fa-check"></i>');
-            }
-            
-            // Mevcut adımı göster
-            $('#' + steps[i]).show();
-            
-            // Progress güncelle
-            $('#generationProgress').css('width', progressValues[i] + '%');
-        }
-        
-        // Son adımı tamamla
-        const lastStep = $('#' + steps[steps.length - 1]);
-        lastStep.find('.spinner-border').removeClass('spinner-border').addClass('text-success').html('<i class="fas fa-check"></i>');
-        
-        await new Promise(resolve => setTimeout(resolve, 500));
+        showAlert('success', 'PRP file downloaded!');
+    }
+}
+
+// ESC tuşu ile modal'ı kapat
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closePreview();
     }
 });
 </script>

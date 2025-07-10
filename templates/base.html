@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Context Engineering PRP Generator{% endblock %}</title>
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -14,250 +14,526 @@
         :root {
             --primary-color: #667eea;
             --secondary-color: #764ba2;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --info-color: #17a2b8;
+            --success-color: #10a37f;
+            --warning-color: #fbbf24;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --sidebar-bg: #ffffff;
+            --content-bg: #f9f9fb;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+        
+        [data-theme=dark] {
+            --sidebar-bg: #1a1a1a;
+            --content-bg: #121212;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --border-color: #374151;
         }
         
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--content-bg);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
         
-        .main-header {
-            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            padding: 2rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            color: white;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .feature-card {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary-color);
-            margin: 1rem 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-2px);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-            border: none;
-            border-radius: 25px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        
-        .progress-bar {
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-        }
-        
+        /* Sidebar Styles */
         .sidebar {
-            background: white;
-            border-radius: 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            z-index: 40;
+        }
+        
+        .sidebar-header {
             padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
         }
         
-        .step-indicator {
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+        
+        .nav-item {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 2rem;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
         }
         
-        .step {
-            text-align: center;
-            flex: 1;
+        .nav-item:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .nav-item.active {
+            background-color: #f3f4f6;
             position: relative;
         }
         
-        .step::after {
+        .nav-item.active::before {
             content: '';
             position: absolute;
-            top: 20px;
-            left: 50%;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+            padding: 2rem;
+            max-width: 1200px;
+        }
+        
+        .content-section {
+            background-color: transparent;
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .section-description {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .form-input,
+        .form-textarea,
+        .form-select {
             width: 100%;
-            height: 2px;
-            background: #dee2e6;
-            z-index: -1;
+            padding: 0.75rem 1rem;
+            background-color: var(--sidebar-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
         }
         
-        .step:last-child::after {
-            display: none;
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
-        .step-number {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #dee2e6;
-            color: #6c757d;
-            display: flex;
+        /* Button Styles */
+        .btn {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 0.5rem;
-            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
         }
         
-        .step.active .step-number {
-            background: var(--primary-color);
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
         }
         
-        .step.completed .step-number {
-            background: var(--success-color);
-            color: white;
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
         }
         
-        .ai-helper {
-            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-            border: 2px solid var(--primary-color);
-            border-radius: 10px;
+        .btn-secondary {
+            background-color: #f3f4f6;
+            color: var(--text-primary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e5e7eb;
+        }
+        
+        /* Message Styles (ChatGPT-like) */
+        .message-container {
+            margin-bottom: 1.5rem;
+        }
+        
+        .message {
             padding: 1.5rem;
-            margin: 1.5rem 0;
+            border-radius: 0.5rem;
+            background-color: var(--sidebar-bg);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
         }
         
-        .spinner-border-sm {
+        .message.ai-response {
+            background-color: var(--content-bg);
+        }
+        
+        /* Progress Indicator */
+        .progress-container {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background-color: #e5e7eb;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transition: width 0.3s ease;
+        }
+        
+        /* Alert Styles */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .alert-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
             width: 1rem;
             height: 1rem;
+            border: 2px solid #f3f4f6;
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
         
-        .alert {
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
-        .form-control, .form-select {
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-            transition: all 0.3s ease;
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
         }
         
-        .form-control:focus, .form-select:focus {
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-            border-color: var(--primary-color);
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
         
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
         
-        .template-card {
-            cursor: pointer;
-            transition: all 0.3s ease;
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
         }
         
-        .template-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
-        
+
+        /* Drawer (side panel) */
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 100%;
+            max-width: 400px;
+            background-color: var(--sidebar-bg);
+            border-left: 1px solid var(--border-color);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+        }
+        .drawer.open {
+            transform: translateX(0);
+        }
+        .drawer-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 1.5rem;
+            color: var(--text-primary);
+        }
+        .drawer-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .drawer {
+                max-width: 100%;
+            }
+        }
+
         .template-card.selected {
-            border: 2px solid var(--primary-color);
-            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border-color: var(--primary-color);
+            background-color: #f3f4f6;
+        }
+
+        [data-theme=dark] .nav-item:hover {
+            background-color: #2d2d2d;
+        }
+
+        [data-theme=dark] .nav-item.active {
+            background-color: #2d2d2d;
+        }
+
+        [data-theme=dark] .btn-secondary {
+            background-color: #2d2d2d;
+            color: #f3f4f6;
+        }
+
+        [data-theme=dark] .btn-secondary:hover {
+            background-color: #3d3d3d;
+        }
+
+        [data-theme=dark] .alert-success {
+            background-color: #064e3b;
+            color: #d1fae5;
+        }
+
+        [data-theme=dark] .alert-error {
+            background-color: #7f1d1d;
+            color: #fee2e2;
+        }
+
+        [data-theme=dark] .alert-info {
+            background-color: #1e3a8a;
+            color: #dbeafe;
+        }
+
+        [data-theme=dark] .progress-bar {
+            background-color: #374151;
+        }
+
+        [data-theme=dark] ::-webkit-scrollbar-track {
+            background: #1f1f1f;
+        }
+
+        [data-theme=dark] ::-webkit-scrollbar-thumb {
+            background: #6b7280;
+        }
+
+        [data-theme=dark] ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        [data-theme=dark] .text-gray-700 {
+            color: #d1d5db;
+        }
+
+        [data-theme=dark] .text-gray-600 {
+            color: #9ca3af;
+        }
+
+        [data-theme=dark] .text-gray-500 {
+            color: #6b7280;
+        }
+
+        [data-theme=dark] .text-gray-400 {
+            color: #9ca3af;
+        }
+
+        [data-theme="dark"] .prose {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .prose pre {
+            background-color: #1f2937;
+            color: #e5e7eb;
+        }
+
+        [data-theme="dark"] .prose code {
+            background-color: #374151;
+            color: #fbbf24;
+        }
+
+        [data-theme="dark"] .prose blockquote {
+            border-left-color: #4b5563;
+            color: #d1d5db;
+        }
+
+        [data-theme="dark"] pre.bg-gray-50 {
+            background-color: #1f2937 !important;
+            color: #e5e7eb;
+        }
+
+        [data-theme="dark"] #previewContainer {
+            background-color: var(--content-bg);
+            border-color: var(--border-color);
         }
     </style>
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-robot me-2"></i>
-                Context Engineering PRP Generator
-            </a>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2 class="text-xl font-semibold flex items-center gap-2">
+                <i class="fas fa-robot text-purple-600"></i>
+                PRP Generator
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">Context Engineering</p>
         </div>
-    </nav>
-
-    <div class="container-fluid mt-4">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3">
-                <div class="sidebar">
-                    <h5><i class="fas fa-cog me-2"></i>Konfigürasyon</h5>
-                    
-                    <!-- Provider Selection -->
-                    <div class="mb-3">
-                        <label class="form-label">LLM Provider</label>
-                        <select class="form-select" id="providerSelect">
-                            {% for provider, status in available_providers.items() %}
-                            <option value="{{ provider }}">{{ provider.title() }}</option>
-                            {% endfor %}
-                        </select>
-                        <small class="text-muted">Seçili provider ile çalışılacak</small>
-                    </div>
-                    
-                    <!-- Progress -->
-                    <div class="mb-3">
-                        <h6><i class="fas fa-chart-line me-2"></i>İlerleme</h6>
-                        <div class="progress mb-2">
-                            <div class="progress-bar" role="progressbar" style="width: {{ progress }}%"></div>
-                        </div>
-                        <small class="text-muted">Adım {{ current_step_index }}/5</small>
-                    </div>
-                    
-                    <!-- Step Navigation -->
-                    <div class="mb-3">
-                        <h6><i class="fas fa-list me-2"></i>Adımlar</h6>
-                        <div class="list-group list-group-flush">
-                            <div class="list-group-item {% if session.current_step == 'welcome' %}active{% endif %}">
-                                <i class="fas fa-home me-2"></i>Hoş Geldiniz
-                            </div>
-                            <div class="list-group-item {% if session.current_step == 'project_setup' %}active{% endif %}">
-                                <i class="fas fa-clipboard me-2"></i>Proje Kurulumu
-                            </div>
-                            <div class="list-group-item {% if session.current_step == 'requirements' %}active{% endif %}">
-                                <i class="fas fa-edit me-2"></i>Gereksinimler
-                            </div>
-                            <div class="list-group-item {% if session.current_step == 'generation' %}active{% endif %}">
-                                <i class="fas fa-robot me-2"></i>PRP Üretimi
-                            </div>
-                            <div class="list-group-item {% if session.current_step == 'results' %}active{% endif %}">
-                                <i class="fas fa-file-alt me-2"></i>Sonuçlar
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        
+        <nav class="sidebar-nav">
+            <a href="/project-setup" class="nav-item {% if session.current_step == 'project_setup' %}active{% endif %}">
+                <i class="fas fa-clipboard w-5 mr-3"></i>
+                <span>Project Setup</span>
+            </a>
+            <a href="/requirements" class="nav-item {% if session.current_step == 'requirements' %}active{% endif %}">
+                <i class="fas fa-list-check w-5 mr-3"></i>
+                <span>Requirements</span>
+            </a>
+            <a href="/generation" class="nav-item {% if session.current_step == 'generation' %}active{% endif %}">
+                <i class="fas fa-wand-magic-sparkles w-5 mr-3"></i>
+                <span>PRP Generation</span>
+            </a>
+            <a href="/results" class="nav-item {% if session.current_step == 'results' %}active{% endif %}">
+                <i class="fas fa-file-lines w-5 mr-3"></i>
+                <span>Results</span>
+            </a>
+            <a href="/api-keys" class="nav-item {% if session.current_step == 'api_keys' %}active{% endif %}">
+                <i class="fas fa-key w-5 mr-3"></i>
+                <span>API Keys</span>
+            </a>
+            <!-- NEW: Drawer triggers -->
+            <div class="nav-item" onclick="openDrawer('templateDrawer')">
+                <i class="fas fa-layer-group w-5 mr-3"></i>
+                <span>Select Template</span>
             </div>
-            
-            <!-- Main Content -->
-            <div class="col-md-9">
-                {% block content %}{% endblock %}
+            {% if session.selected_template %}
+            <div class="nav-item" onclick="clearTemplateSelection()">
+                <i class="fas fa-trash w-5 mr-3"></i>
+                <span>Clear Template</span>
             </div>
+            {% endif %}
+            <div class="nav-item" onclick="openDrawer('infoDrawer')">
+                <i class="fas fa-circle-info w-5 mr-3"></i>
+                <span>Info</span>
+            </div>
+        </nav>
+        
+        <div class="sidebar-nav border-t border-gray-200 pt-4">
+            <div class="px-6 mb-4">
+                <label class="text-sm font-medium text-gray-700 block mb-2">LLM Provider</label>
+                <select class="form-select text-sm" id="providerSelect">
+                    {% for provider, meta in provider_info.providers.items() if meta.has_api_key %}
+                    <option value="{{ provider }}" {% if session.selected_provider == provider %}selected{% endif %}>{{ provider.title() }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <!-- Dark Mode Toggle in Sidebar -->
+        <div class="sidebar-nav border-t border-gray-200 pt-4">
+            <div class="px-6 mb-4">
+                <label class="text-sm font-medium text-gray-700 block mb-2">Theme</label>
+                <button onclick="toggleDarkMode()" class="btn btn-secondary w-full">
+                    <i class="fas fa-moon mr-2"></i> Toggle Dark Mode
+                </button>
+            </div>
+        </div>
+        
+        <!-- Progress -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ progress }}%"></div>
+            </div>
+            <p class="text-xs text-gray-500">Step {{ current_step_index }}/5</p>
         </div>
     </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <div id="alerts-container"></div>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Mobile Menu Button -->
+    <button class="md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
     <script>
+        // Sidebar toggle for mobile
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('open');
+        }
+        
         // Provider değiştirme
-        $('#providerSelect').change(function() {
-            const provider = $(this).val();
+        document.getElementById('providerSelect').addEventListener('change', function(e) {
+            const provider = e.target.value;
             
             fetch('/api/set-provider', {
                 method: 'POST',
@@ -271,51 +547,193 @@
                 if (data.success) {
                     showAlert('success', data.message);
                 } else {
-                    showAlert('danger', data.error);
+                    showAlert('error', data.error);
                 }
             })
             .catch(error => {
-                showAlert('danger', 'Provider ayarlama hatası: ' + error);
+                showAlert('error', 'Provider ayarlama hatası: ' + error);
             });
         });
         
         // Alert gösterme fonksiyonu
         function showAlert(type, message) {
-            const alertHtml = `
-                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
+            const alertsContainer = document.getElementById('alerts-container');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            
+            const icon = type === 'success' ? 'fa-check-circle' : 
+                         type === 'error' ? 'fa-exclamation-circle' : 
+                         'fa-info-circle';
+            
+            alertDiv.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" class="ml-auto text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
             `;
             
-            // Mevcut alert'leri temizle
-            $('.alert').remove();
-            
-            // Yeni alert'i ekle
-            $('.container-fluid').prepend(alertHtml);
+            alertsContainer.appendChild(alertDiv);
             
             // 5 saniye sonra otomatik kapat
             setTimeout(() => {
-                $('.alert').fadeOut();
+                alertDiv.remove();
             }, 5000);
         }
         
-        // Loading spinner gösterme
-        function showLoading(button) {
-            const originalText = button.html();
-            button.data('original-text', originalText);
-            button.html('<span class="spinner-border spinner-border-sm me-2"></span>Yükleniyor...');
-            button.prop('disabled', true);
+        // Loading state helper
+        function setLoading(button, isLoading) {
+            if (isLoading) {
+                button.disabled = true;
+                button.dataset.originalText = button.innerHTML;
+                button.innerHTML = '<span class="spinner mr-2"></span> Loading...';
+            } else {
+                button.disabled = false;
+                button.innerHTML = button.dataset.originalText;
+            }
         }
-        
-        // Loading spinner gizleme
-        function hideLoading(button) {
-            const originalText = button.data('original-text');
-            button.html(originalText);
-            button.prop('disabled', false);
+
+        // Drawer helpers
+        function openDrawer(id) {
+            document.getElementById(id).classList.add('open');
         }
+        function closeDrawer(id) {
+            document.getElementById(id).classList.remove('open');
+        }
+
+        // Template selection inside drawer
+        document.addEventListener('DOMContentLoaded', function () {
+            const drawerCards = document.querySelectorAll('#drawerTemplateCards .template-card');
+            const drawerUseBtn = document.getElementById('drawerUseTemplate');
+            let selectedTemplateId = null;
+
+            drawerCards.forEach(card => {
+                card.addEventListener('click', function () {
+                    drawerCards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedTemplateId = this.dataset.template;
+                    drawerUseBtn.disabled = false;
+                });
+            });
+
+            if (drawerUseBtn) {
+                drawerUseBtn.addEventListener('click', function () {
+                    if (!selectedTemplateId) return;
+                    const btn = this;
+                    setLoading(btn, true);
+                    fetch('/api/select-template', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ template_id: selectedTemplateId })
+                    }).then(r => r.json())
+                      .then(data => {
+                          setLoading(btn, false);
+                          if (data.success) {
+                              showAlert('success', data.message);
+                              closeDrawer('templateDrawer');
+                              window.location.href = '/project-setup';
+                          } else {
+                              showAlert('error', data.error);
+                          }
+                      }).catch(err => {
+                          setLoading(btn, false);
+                          showAlert('error', 'Template seçme hatası: ' + err);
+                      });
+                });
+            }
+        });
+
+        // Template clear helper
+        function clearTemplateSelection() {
+            fetch('/api/clear-template', {
+                method: 'POST'
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    // Reload to update session-dependent UI
+                    setTimeout(() => window.location.reload(), 500);
+                } else {
+                    showAlert('error', data.error || 'Şablonu temizleme hatası');
+                }
+            }).catch(err => {
+                showAlert('error', 'Şablonu temizleme hatası: ' + err);
+            });
+        }
+
+        // Dark Mode Functions
+        function toggleDarkMode() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
     </script>
     
+    <!-- Template Drawer -->
+    <div id="templateDrawer" class="drawer" aria-hidden="true">
+        <div class="drawer-header flex justify-between items-center">
+            <h2 class="text-lg font-semibold">Select a Template</h2>
+            <button onclick="closeDrawer('templateDrawer')" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="drawer-body space-y-4" id="drawerTemplateCards">
+            {% for template_id, template_data in templates.items() %}
+            <div class="message template-card cursor-pointer hover:border-purple-400 transition-colors" data-template="{{ template_id }}">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="font-medium flex items-center gap-2">
+                        <span>{{ template_data.icon }}</span>
+                        {{ template_data.title }}
+                    </h3>
+                    <span class="text-xs text-gray-500">{{ template_data.complexity }}</span>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">{{ template_data.description }}</p>
+                <div class="flex items-center gap-4 text-xs text-gray-500">
+                    <span class="flex items-center gap-1">
+                        <i class="fas fa-clock"></i>
+                        {{ template_data.estimated_time }}
+                    </span>
+                    <span class="flex items-center gap-1">
+                        <i class="fas fa-layer-group"></i>
+                        {{ template_data.complexity }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="drawer-footer flex gap-3">
+            <button class="btn btn-secondary flex-1" onclick="closeDrawer('templateDrawer')">Cancel</button>
+            <button class="btn btn-primary flex-1" id="drawerUseTemplate" disabled>Continue</button>
+        </div>
+    </div>
+
+    <!-- Info Drawer -->
+    <div id="infoDrawer" class="drawer" aria-hidden="true">
+        <div class="drawer-header flex justify-between items-center">
+            <h2 class="text-lg font-semibold">About the Application</h2>
+            <button onclick="closeDrawer('infoDrawer')" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="drawer-body space-y-4 text-sm text-gray-700">
+            <p>This application helps you create PRP (Product Requirements Prompt) in a Context Engineering approach.</p>
+            <p>Follow the steps in the left menu to define your project, specify requirements, and download the PRP created by our AI team.</p>
+            <p>If you have any questions, please report them on the GitHub repository or via feedback.</p>
+            <hr class="my-2">
+            <h3 class="font-medium text-gray-700">Help and Tips</h3>
+            <ul class="list-disc pl-5 space-y-1">
+                <li><span class="font-semibold">Select Template:</span> Click on "Select Template" in the left menu and select a suitable template from the panel. Use the "Clear Template" button to cancel your selection.</li>
+                <li><span class="font-semibold">Navigate Steps:</span> Follow the steps in the Project Setup → Requirements → PRP Generation → Results menu.</li>
+                <li><span class="font-semibold">AI Assistance:</span> The "AI to Fill" button automatically fills in fields; if necessary, clear them with "Clear".</li>
+                <li><span class="font-semibold">Download PRP:</span> You can download the output in Markdown, TXT, or JSON format on the Results page.</li>
+                <li><span class="font-semibold">Feedback:</span> Help us improve by filling out the feedback form on the Results page.</li>
+            </ul>
+            <p class="text-xs text-gray-400">Version: 1.0.0</p>
+        </div>
+    </div>
     {% block extra_js %}{% endblock %}
 </body>
 </html> 

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}API Anahtarları - Context Engineering{% endblock %}
+
+{% block content %}
+<div class="content-section max-w-xl mx-auto">
+    <h1 class="section-title text-center mb-4">API Anahtarları</h1>
+    <p class="text-gray-600 text-sm mb-6 text-center">Kullandığınız LLM servislerinin gizli anahtarlarını burada saklayın. Anahtarlar sadece bu oturum süresince sunucu tarafında depolanır ve .env dosyasında tutulmaz.</p>
+
+    <form id="apiKeyForm" class="space-y-4">
+        {% for provider, status in providers.items() %}
+        <div class="form-group">
+            <label class="form-label" for="key_{{ provider }}">{{ provider.title() }} API Key</label>
+            <input type="password" id="key_{{ provider }}" name="key_{{ provider }}" class="form-input mb-2" placeholder="{{ provider }} gizli anahtarı{% if saved_keys.get(provider, {}).get('api_key') %} (kayıtlı){% endif %}" value="">
+            <input type="text" id="model_{{ provider }}" name="model_{{ provider }}" class="form-input" placeholder="Varsayılan model: {{ defaults.get(provider, '') }}" value="{{ saved_keys.get(provider, {}).get('model', defaults.get(provider, '')) }}">
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary w-full" id="saveKeysBtn">Kaydet</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('apiKeyForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const button = document.getElementById('saveKeysBtn');
+        setLoading(button, true);
+        const inputs = this.querySelectorAll('input');
+        const settings = {};
+        inputs.forEach(inp => {
+            const [type, provider] = inp.id.split('_');
+            settings[provider] = settings[provider] || {};
+            if (type === 'key' && inp.value.trim()) settings[provider]['api_key'] = inp.value.trim();
+            if (type === 'model' && inp.value.trim()) settings[provider]['model'] = inp.value.trim();
+        });
+        fetch('/api/save-api-keys', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ api_keys: settings })
+        }).then(r => r.json()).then(data => {
+            setLoading(button, false);
+            if (data.success) {
+                showAlert('success', data.message);
+            } else {
+                showAlert('error', data.error);
+            }
+        }).catch(err => {
+            setLoading(button, false);
+            showAlert('error', 'Kaydetme hatası: ' + err);
+        });
+    });
+</script>
+{% endblock %} 

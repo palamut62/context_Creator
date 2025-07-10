@@ -3,178 +3,206 @@
 {% block title %}Ana Sayfa - Context Engineering PRP Generator{% endblock %}
 
 {% block content %}
-<!-- Main Header -->
-<div class="main-header">
-    <h1><i class="fas fa-robot me-3"></i>Context Engineering PRP Generator'a Hoş Geldiniz!</h1>
-    <p class="lead">Yazılım geliştirme projeleriniz için AI destekli PRP dosyaları oluşturun</p>
+<!-- Minimal Home -->
+<div class="content-section text-center">
+    <h1 class="section-title mb-4">Context Engineering PRP Generator</h1>
+    <p class="text-gray-600">Sol menüyü kullanarak şablon seçin veya proje adımlarına geçin.</p>
 </div>
 
-<!-- Features Section -->
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="feature-card">
-            <h4><i class="fas fa-magic me-2"></i>Özellikler</h4>
-            <ul>
-                <li><strong>🤖 Multi-LLM Desteği:</strong> OpenAI, Gemini, Claude, OpenRouter, DeepSeek</li>
-                <li><strong>👥 AI Yazılım Ekibi:</strong> Sistem Analisti, Mimar, Test Uzmanı, Dokümantasyon Uzmanı</li>
-                <li><strong>📋 Kapsamlı Analiz:</strong> Proje gereksinimlerini detaylı şekilde toplar</li>
-                <li><strong>🎯 Context Engineering:</strong> Tüm AI kod geliştirme araçları ile uyumlu</li>
-                <li><strong>📊 Kalite Kontrolü:</strong> Üretilen PRP'lerin otomatik doğrulaması</li>
-            </ul>
-        </div>
-    </div>
+<!-- Features Grid -->
+<div class="content-section">
+    <h2 class="text-2xl font-semibold mb-6">🎯 Özellikler</h2>
     
-    <div class="col-md-6">
-        <div class="feature-card">
-            <h4><i class="fas fa-cogs me-2"></i>Nasıl Çalışır?</h4>
-            <ol>
-                <li><strong>Proje Kurulumu:</strong> Temel proje bilgilerini girin</li>
-                <li><strong>Gereksinim Toplama:</strong> Detaylı gereksinimlerinizi belirtin</li>
-                <li><strong>AI Ekip Analizi:</strong> Uzman ajanlar projenizi analiz eder</li>
-                <li><strong>PRP Üretimi:</strong> Context Engineering standartlarında PRP oluşturulur</li>
-                <li><strong>Sonuç ve Export:</strong> PRP'nizi indirin ve kullanın</li>
-            </ol>
-        </div>
-    </div>
-</div>
-
-<!-- Template Selection -->
-<div class="card mb-4">
-    <div class="card-header">
-        <h5><i class="fas fa-templates me-2"></i>Hızlı Başlangıç Template'leri</h5>
-        <p class="mb-0 text-muted">Popüler proje türleri için hazır template'lerden birini seçin:</p>
-    </div>
-    <div class="card-body">
-        <div class="row" id="templateCards">
-            {% for template_id, template_data in templates.items() %}
-            <div class="col-md-6 mb-3">
-                <div class="card template-card" data-template="{{ template_id }}">
-                    <div class="card-body">
-                        <h6 class="card-title">
-                            {{ template_data.icon }} {{ template_data.title }}
-                        </h6>
-                        <p class="card-text">{{ template_data.description }}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">
-                                <i class="fas fa-clock me-1"></i>{{ template_data.estimated_time }}
-                            </small>
-                            <small class="text-muted">
-                                <i class="fas fa-layer-group me-1"></i>{{ template_data.complexity }}
-                            </small>
-                        </div>
-                    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-4">
+            <div class="flex items-start gap-3">
+                <span class="text-purple-600 mt-1">🤖</span>
+                <div>
+                    <h3 class="font-medium text-gray-900">Multi-LLM Provider Desteği</h3>
+                    <p class="text-sm text-gray-600">OpenAI, Gemini, Claude, OpenRouter, DeepSeek gibi popüler LLM sağlayıcılarını destekler</p>
                 </div>
             </div>
-            {% endfor %}
+            
+            <div class="flex items-start gap-3">
+                <span class="text-purple-600 mt-1">👥</span>
+                <div>
+                    <h3 class="font-medium text-gray-900">AI Yazılım Ekibi</h3>
+                    <p class="text-sm text-gray-600">Sistem Analisti, Yazılım Mimarı, Test Uzmanı ve Dokümantasyon Uzmanı ajanları ile kapsamlı analiz</p>
+                </div>
+            </div>
+            
+            <div class="flex items-start gap-3">
+                <span class="text-purple-600 mt-1">📋</span>
+                <div>
+                    <h3 class="font-medium text-gray-900">Detaylı Gereksinim Analizi</h3>
+                    <p class="text-sm text-gray-600">Fonksiyonel ve teknik gereksinimleri, kısıtlamaları ve riskleri kapsamlı şekilde toplar</p>
+                </div>
+            </div>
         </div>
         
-        <div class="text-center mt-3">
-            <button class="btn btn-outline-primary me-2" id="clearTemplate">
-                <i class="fas fa-times me-2"></i>Template Seçimini Temizle
-            </button>
-            <button class="btn btn-primary" id="useTemplate" disabled>
-                <i class="fas fa-check me-2"></i>Seçili Template ile Devam Et
-            </button>
+        <div class="space-y-4">
+            <div class="flex items-start gap-3">
+                <span class="text-purple-600 mt-1">🎯</span>
+                <div>
+                    <h3 class="font-medium text-gray-900">Context Engineering Uyumlu</h3>
+                    <p class="text-sm text-gray-600">Modern AI kod asistanları için optimize edilmiş prompt formatı</p>
+                </div>
+            </div>
+            
+            <div class="flex items-start gap-3">
+                <span class="text-purple-600 mt-1">⚡</span>
+                <div>
+                    <h3 class="font-medium text-gray-900">Hızlı ve Kolay</h3>
+                    <p class="text-sm text-gray-600">AI destekli otomatik form doldurma ile dakikalar içinde PRP oluşturun</p>
+                </div>
+            </div>
+            
+            <div class="flex items-start gap-3">
+                <span class="text-purple-600 mt-1">📊</span>
+                <div>
+                    <h3 class="font-medium text-gray-900">Kalite Kontrolü</h3>
+                    <p class="text-sm text-gray-600">Üretilen PRP'lerin otomatik doğrulaması ve kalite kontrolü</p>
+                </div>
+            </div>
         </div>
+    </div>
+</div>
+
+<!-- How it Works -->
+<div class="content-section">
+    <h2 class="text-2xl font-semibold mb-6">🚀 Nasıl Çalışır?</h2>
+    
+    <div class="space-y-4">
+        <div class="message">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">Adım 1</span>
+                <h3 class="font-medium">Proje Kurulumu</h3>
+            </div>
+            <p class="text-gray-600 ml-12">Proje adı, türü, açıklama gibi temel bilgileri girin. AI yardımcısı size form doldurma konusunda yardımcı olabilir.</p>
+        </div>
+        
+        <div class="message">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">Adım 2</span>
+                <h3 class="font-medium">Gereksinim Toplama</h3>
+            </div>
+            <p class="text-gray-600 ml-12">Fonksiyonel ve teknik gereksinimleri, kısıtlamaları ve kabul kriterlerini belirtin.</p>
+        </div>
+        
+        <div class="message">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">Adım 3</span>
+                <h3 class="font-medium">AI Ekip Analizi</h3>
+            </div>
+            <p class="text-gray-600 ml-12">Uzman AI ajanları projenizi analiz eder ve kapsamlı bir PRP oluşturur.</p>
+        </div>
+        
+        <div class="message">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">Adım 4</span>
+                <h3 class="font-medium">Sonuç ve Export</h3>
+            </div>
+            <p class="text-gray-600 ml-12">Oluşturulan PRP'yi inceleyin, düzenleyin ve farklı formatlarda indirin.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Templates Section -->
+<div class="content-section">
+    <h2 class="text-2xl font-semibold mb-2">📁 Hızlı Başlangıç Template'leri</h2>
+    <p class="text-gray-600 mb-6">Popüler proje türleri için hazır template'lerden birini seçin veya sıfırdan başlayın.</p>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="templateCards">
+        {% for template_id, template_data in templates.items() %}
+        <div class="message template-card cursor-pointer hover:border-purple-400 transition-colors" data-template="{{ template_id }}">
+            <div class="flex justify-between items-start mb-2">
+                <h3 class="font-medium flex items-center gap-2">
+                    <span>{{ template_data.icon }}</span>
+                    {{ template_data.title }}
+                </h3>
+                <span class="text-xs text-gray-500">{{ template_data.complexity }}</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-3">{{ template_data.description }}</p>
+            <div class="flex items-center gap-4 text-xs text-gray-500">
+                <span class="flex items-center gap-1">
+                    <i class="fas fa-clock"></i>
+                    {{ template_data.estimated_time }}
+                </span>
+                <span class="flex items-center gap-1">
+                    <i class="fas fa-layer-group"></i>
+                    {{ template_data.complexity }}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="flex gap-3 mt-6">
+        <button class="btn btn-secondary" id="clearTemplate" style="display: none;">
+            <i class="fas fa-times mr-2"></i>
+            Seçimi Temizle
+        </button>
+        <button class="btn btn-primary" id="useTemplate" disabled>
+            <i class="fas fa-arrow-right mr-2"></i>
+            Template ile Devam Et
+        </button>
     </div>
 </div>
 
 <!-- Start Without Template -->
-<div class="text-center">
-    <h5 class="mb-3">Veya Template Kullanmadan Başlayın</h5>
-    <a href="/project-setup" class="btn btn-outline-primary btn-lg">
-        <i class="fas fa-play me-2"></i>Proje Kurulumuna Başla
+<div class="content-section text-center">
+    <div class="inline-flex items-center gap-4 text-gray-500 mb-4">
+        <span class="h-px bg-gray-300 w-20"></span>
+        <span>veya</span>
+        <span class="h-px bg-gray-300 w-20"></span>
+    </div>
+    
+    <a href="/project-setup" class="btn btn-secondary">
+        <i class="fas fa-file-plus mr-2"></i>
+        Template Kullanmadan Başla
     </a>
 </div>
 
-<!-- AI Helper Info -->
-<div class="ai-helper mt-4">
-    <h5><i class="fas fa-robot me-2"></i>AI Yardımcısı</h5>
-    <p class="mb-2">
-        Bu uygulamada <strong>AI ile Otomatik Doldur</strong> özelliği bulunmaktadır. 
-        Proje açıklamanızı girdikten sonra AI, form alanlarını otomatik olarak doldurabilir.
-    </p>
-    <div class="row">
-        <div class="col-md-6">
-            <h6><i class="fas fa-magic me-2"></i>AI Neler Yapabilir?</h6>
-            <ul class="mb-0">
-                <li>Proje türünü otomatik belirler</li>
-                <li>Uygun teknoloji stack'i önerir</li>
-                <li>Hedef kitleyi analiz eder</li>
-                <li>Zaman çizelgesi önerir</li>
-            </ul>
+<!-- AI Assistant Info -->
+<div class="message ai-response">
+    <div class="flex items-start gap-3">
+        <div class="bg-purple-100 text-purple-600 p-2 rounded-lg">
+            <i class="fas fa-robot text-lg"></i>
         </div>
-        <div class="col-md-6">
-            <h6><i class="fas fa-list-check me-2"></i>Gereksinimler</h6>
-            <ul class="mb-0">
-                <li>Fonksiyonel gereksinimleri çıkarır</li>
-                <li>Teknik gereksinimleri belirler</li>
-                <li>Kısıtlamaları analiz eder</li>
-                <li>Ek önerilerde bulunur</li>
-            </ul>
+        <div class="flex-1">
+            <h3 class="font-medium mb-2">AI Asistan Hakkında</h3>
+            <p class="text-sm text-gray-600 mb-3">
+                Bu uygulama boyunca AI asistanı size yardımcı olacak. Proje açıklamanızı yazdıktan sonra 
+                "AI ile Doldur" butonuna tıklayarak form alanlarını otomatik olarak doldurabilirsiniz.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <h4 class="font-medium text-gray-700 mb-1">Form Doldurma</h4>
+                    <ul class="text-gray-600 space-y-1">
+                        <li>• Proje türünü otomatik belirler</li>
+                        <li>• Uygun teknoloji stack'i önerir</li>
+                        <li>• Hedef kitleyi analiz eder</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-700 mb-1">Gereksinim Analizi</h4>
+                    <ul class="text-gray-600 space-y-1">
+                        <li>• Fonksiyonel gereksinimleri çıkarır</li>
+                        <li>• Teknik kısıtlamaları belirler</li>
+                        <li>• Risk analizinde bulunur</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .template-card.selected {
+        border-color: var(--primary-color);
+        background-color: #f3f4f6;
+    }
+</style>
 {% endblock %}
 
-{% block extra_js %}
-<script>
-$(document).ready(function() {
-    let selectedTemplate = null;
-    
-    // Template seçimi
-    $('.template-card').click(function() {
-        // Önceki seçimi temizle
-        $('.template-card').removeClass('selected');
-        
-        // Yeni seçimi işaretle
-        $(this).addClass('selected');
-        selectedTemplate = $(this).data('template');
-        
-        // Butonu aktif et
-        $('#useTemplate').prop('disabled', false);
-    });
-    
-    // Template temizleme
-    $('#clearTemplate').click(function() {
-        $('.template-card').removeClass('selected');
-        selectedTemplate = null;
-        $('#useTemplate').prop('disabled', true);
-    });
-    
-    // Template ile devam etme
-    $('#useTemplate').click(function() {
-        if (selectedTemplate) {
-            const button = $(this);
-            showLoading(button);
-            
-            fetch('/api/select-template', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ template_id: selectedTemplate })
-            })
-            .then(response => response.json())
-            .then(data => {
-                hideLoading(button);
-                
-                if (data.success) {
-                    showAlert('success', data.message);
-                    // Proje kurulumuna yönlendir
-                    setTimeout(() => {
-                        window.location.href = '/project-setup';
-                    }, 1000);
-                } else {
-                    showAlert('danger', data.error);
-                }
-            })
-            .catch(error => {
-                hideLoading(button);
-                showAlert('danger', 'Template seçme hatası: ' + error);
-            });
-        }
-    });
-});
-</script>
-{% endblock %} 
+{% block extra_js %}{% endblock %} 

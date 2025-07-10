@@ -3,276 +3,455 @@
 {% block title %}Sonuçlar - Context Engineering PRP Generator{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header">
-        <h4><i class="fas fa-file-alt me-2"></i>Üretilen PRP Dosyası</h4>
-        <p class="text-muted mb-0">Projeniz için oluşturulan PRP dosyasını görüntüleyin ve indirin</p>
+<!-- Page Header -->
+<div class="content-section">
+    <h1 class="section-title">PRP Üretimi Tamamlandı! 🎉</h1>
+    <p class="section-description">
+        Projeniz için Context Engineering standartlarında PRP dosyası başarıyla oluşturuldu.
+        Aşağıdan dosyanızı inceleyebilir ve indirebilirsiniz.
+    </p>
     </div>
-    <div class="card-body">
-        <!-- Dosya Bilgileri -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card border-info">
-                    <div class="card-header bg-info text-white">
-                        <h6><i class="fas fa-info-circle me-2"></i>Dosya Bilgileri</h6>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Dosya Adı:</strong> <span id="fileName">prp_document.md</span></p>
-                        <p><strong>Boyut:</strong> <span id="fileSize">-</span></p>
-                        <p><strong>Oluşturulma:</strong> <span id="createdAt">{{ session.generated_at or 'Şimdi' }}</span></p>
-                        <p><strong>Format:</strong> <span id="fileFormat">Markdown</span></p>
-                    </div>
+
+<!-- File Info and Actions -->
+<div class="content-section">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- File Details -->
+        <div class="message">
+            <h3 class="font-medium mb-3 flex items-center gap-2">
+                <i class="fas fa-file-alt text-purple-600"></i>
+                Dosya Bilgileri
+            </h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Dosya Adı:</span>
+                    <span class="font-mono">prp_document.md</span>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card border-success">
-                    <div class="card-header bg-success text-white">
-                        <h6><i class="fas fa-chart-pie me-2"></i>İçerik Özeti</h6>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Bölüm Sayısı:</strong> <span id="sectionCount">-</span></p>
-                        <p><strong>Kelime Sayısı:</strong> <span id="wordCount">-</span></p>
-                        <p><strong>Satır Sayısı:</strong> <span id="lineCount">-</span></p>
-                        <p><strong>Karakter Sayısı:</strong> <span id="charCount">-</span></p>
-                    </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Boyut:</span>
+                    <span id="fileSize">-</span>
                 </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Oluşturulma:</span>
+                    <span>{{ session.generation_settings.generated_at if session.generation_settings else 'Şimdi' }}</span>
             </div>
-            <div class="col-md-4">
-                <div class="card border-warning">
-                    <div class="card-header bg-warning text-white">
-                        <h6><i class="fas fa-download me-2"></i>İndirme Seçenekleri</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-primary" id="downloadMd">
-                                <i class="fas fa-file-code me-2"></i>Markdown (.md)
-                            </button>
-                            <button class="btn btn-outline-primary" id="downloadTxt">
-                                <i class="fas fa-file-alt me-2"></i>Plain Text (.txt)
-                            </button>
-                            <button class="btn btn-outline-primary" id="downloadJson">
-                                <i class="fas fa-file-code me-2"></i>JSON (.json)
-                            </button>
-                            <button class="btn btn-outline-primary" id="downloadPdf">
-                                <i class="fas fa-file-pdf me-2"></i>PDF (.pdf)
-                            </button>
-                        </div>
-                    </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Format:</span>
+                    <span>Markdown</span>
                 </div>
             </div>
         </div>
 
-        <!-- İçerik Önizleme -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h6><i class="fas fa-eye me-2"></i>İçerik Önizleme</h6>
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-outline-primary btn-sm" id="rawView">
-                        <i class="fas fa-code me-1"></i>Ham
-                    </button>
-                    <button type="button" class="btn btn-primary btn-sm" id="renderedView">
-                        <i class="fas fa-eye me-1"></i>Render
-                    </button>
+        <!-- Content Stats -->
+        <div class="message">
+            <h3 class="font-medium mb-3 flex items-center gap-2">
+                <i class="fas fa-chart-bar text-purple-600"></i>
+                İçerik İstatistikleri
+            </h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Bölüm Sayısı:</span>
+                    <span id="sectionCount">-</span>
                 </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Kelime Sayısı:</span>
+                    <span id="wordCount">-</span>
             </div>
-            <div class="card-body">
-                <!-- Ham İçerik -->
-                <div id="rawContent" style="display: none;">
-                    <pre class="bg-light p-3" style="max-height: 600px; overflow-y: auto; border-radius: 5px;"><code id="rawCode">{{ session.generated_content or 'İçerik yükleniyor...' }}</code></pre>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Satır Sayısı:</span>
+                    <span id="lineCount">-</span>
                 </div>
-                
-                <!-- Render Edilmiş İçerik -->
-                <div id="renderedContent">
-                    <div class="markdown-content" id="markdownContent" style="max-height: 600px; overflow-y: auto;">
-                        {{ session.generated_content_html or '<p>İçerik yükleniyor...</p>' | safe }}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Paylaşım ve Dışa Aktarma -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h6><i class="fas fa-share-alt me-2"></i>Paylaşım ve Dışa Aktarma</h6>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Paylaşım</h6>
-                        <div class="d-flex gap-2 mb-3">
-                            <button class="btn btn-outline-primary" id="copyLink">
-                                <i class="fas fa-link me-2"></i>Link Kopyala
-                            </button>
-                            <button class="btn btn-outline-primary" id="copyContent">
-                                <i class="fas fa-copy me-2"></i>İçerik Kopyala
-                            </button>
-                            <button class="btn btn-outline-primary" id="shareEmail">
-                                <i class="fas fa-envelope me-2"></i>E-posta Gönder
-                            </button>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Dışa Aktarma</h6>
-                        <div class="d-flex gap-2 mb-3">
-                            <button class="btn btn-outline-success" id="exportGithub">
-                                <i class="fab fa-github me-2"></i>GitHub
-                            </button>
-                            <button class="btn btn-outline-success" id="exportNotion">
-                                <i class="fas fa-sticky-note me-2"></i>Notion
-                            </button>
-                            <button class="btn btn-outline-success" id="exportConfluence">
-                                <i class="fas fa-confluence me-2"></i>Confluence
-                            </button>
-                        </div>
-                    </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Karakter:</span>
+                    <span id="charCount">-</span>
                 </div>
             </div>
         </div>
 
-        <!-- Geri Bildirim -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h6><i class="fas fa-star me-2"></i>Geri Bildirim</h6>
+        <!-- Quick Actions -->
+        <div class="message">
+            <h3 class="font-medium mb-3 flex items-center gap-2">
+                <i class="fas fa-download text-purple-600"></i>
+                Hızlı İşlemler
+            </h3>
+            <div class="space-y-2">
+                <button class="btn btn-primary w-full" onclick="downloadFile('markdown')">
+                    <i class="fas fa-file-code mr-2"></i>
+                    Markdown İndir
+                            </button>
+                <button class="btn btn-secondary w-full" onclick="copyContent()">
+                    <i class="fas fa-copy mr-2"></i>
+                    İçeriği Kopyala
+                            </button>
+                <button class="btn btn-secondary w-full" onclick="toggleView()">
+                    <i class="fas fa-eye mr-2"></i>
+                    <span id="viewToggleText">Ham Görünüm</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+</div>
+
+<!-- Content Preview -->
+<div class="content-section">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">📄 İçerik Önizleme</h2>
+        <div class="flex gap-2">
+            <button class="text-sm text-gray-600 hover:text-gray-900" onclick="expandPreview()">
+                <i class="fas fa-expand mr-1"></i>
+                Genişlet
+            </button>
+            <button class="text-sm text-gray-600 hover:text-gray-900" onclick="collapsePreview()">
+                <i class="fas fa-compress mr-1"></i>
+                Daralt
+            </button>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Kalite Değerlendirmesi</h6>
-                        <div class="mb-3">
-                            <label class="form-label">Üretilen PRP'nin kalitesi nasıl?</label>
-                            <div class="btn-group w-100" role="group">
-                                <input type="radio" class="btn-check" name="quality" id="quality1" value="1">
-                                <label class="btn btn-outline-danger" for="quality1">1</label>
-                                <input type="radio" class="btn-check" name="quality" id="quality2" value="2">
-                                <label class="btn btn-outline-warning" for="quality2">2</label>
-                                <input type="radio" class="btn-check" name="quality" id="quality3" value="3">
-                                <label class="btn btn-outline-info" for="quality3">3</label>
-                                <input type="radio" class="btn-check" name="quality" id="quality4" value="4">
-                                <label class="btn btn-outline-success" for="quality4">4</label>
-                                <input type="radio" class="btn-check" name="quality" id="quality5" value="5">
-                                <label class="btn btn-outline-primary" for="quality5">5</label>
+        </div>
+
+    <div class="message" style="max-height: 600px; overflow-y: auto;" id="previewContainer">
+        <!-- Rendered Content -->
+        <div id="renderedContent" class="prose prose-sm max-w-none">
+            {% if session.generated_prp %}
+            <div class="markdown-content">
+                {{ session.generated_prp | safe }}
+            </div>
+            {% else %}
+            <p class="text-gray-500">İçerik yükleniyor...</p>
+            {% endif %}
+        </div>
+        
+        <!-- Raw Content -->
+        <div id="rawContent" style="display: none;">
+            <pre class="bg-gray-50 p-4 rounded text-xs font-mono whitespace-pre-wrap">{{ session.generated_prp or 'İçerik yükleniyor...' }}</pre>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <h6>Yorum</h6>
-                        <textarea class="form-control" id="feedback" rows="3" placeholder="Önerilerinizi paylaşın..."></textarea>
-                        <button class="btn btn-primary mt-2" id="submitFeedback">
-                            <i class="fas fa-paper-plane me-2"></i>Gönder
+
+<!-- Download Options -->
+<div class="content-section">
+    <h2 class="text-xl font-semibold mb-4">💾 İndirme Seçenekleri</h2>
+    
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <button class="message hover:border-purple-400 cursor-pointer transition-colors text-center py-4" onclick="downloadFile('markdown')">
+            <i class="fas fa-file-code text-2xl text-purple-600 mb-2"></i>
+            <p class="font-medium">Markdown</p>
+            <p class="text-xs text-gray-500">.md formatı</p>
+        </button>
+        
+        <button class="message hover:border-purple-400 cursor-pointer transition-colors text-center py-4" onclick="downloadFile('txt')">
+            <i class="fas fa-file-alt text-2xl text-blue-600 mb-2"></i>
+            <p class="font-medium">Düz Metin</p>
+            <p class="text-xs text-gray-500">.txt formatı</p>
+        </button>
+        
+        <button class="message hover:border-purple-400 cursor-pointer transition-colors text-center py-4" onclick="downloadFile('json')">
+            <i class="fas fa-file-code text-2xl text-green-600 mb-2"></i>
+            <p class="font-medium">JSON</p>
+            <p class="text-xs text-gray-500">Yapılandırılmış</p>
+        </button>
+        
+        <button class="message hover:border-purple-400 cursor-pointer transition-colors text-center py-4" onclick="shareEmail()">
+            <i class="fas fa-envelope text-2xl text-orange-600 mb-2"></i>
+            <p class="font-medium">E-posta</p>
+            <p class="text-xs text-gray-500">Paylaş</p>
                         </button>
                     </div>
+</div>
+
+<!-- Feedback Section -->
+<div class="content-section">
+    <h2 class="text-xl font-semibold mb-4">🌟 Geri Bildirim</h2>
+    
+    <div class="message">
+        <p class="text-sm text-gray-600 mb-4">
+            Üretilen PRP'nin kalitesini değerlendirin ve iyileştirme önerilerinizi paylaşın.
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="form-label">Kalite Değerlendirmesi</label>
+                <div class="flex gap-2">
+                    {% for i in range(1, 6) %}
+                    <label class="cursor-pointer">
+                        <input type="radio" name="quality" value="{{ i }}" class="sr-only peer">
+                        <div class="w-12 h-12 rounded-lg border-2 border-gray-300 flex items-center justify-center peer-checked:border-purple-600 peer-checked:bg-purple-50 peer-checked:text-purple-600 hover:border-gray-400 transition-colors">
+                            {{ i }}
+                        </div>
+                    </label>
+                    {% endfor %}
                 </div>
-            </div>
+                <p class="text-xs text-gray-500 mt-1">1 = Kötü, 5 = Mükemmel</p>
         </div>
 
-        <!-- Navigasyon -->
-        <div class="d-flex justify-content-between">
-            <a href="/generation" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Önceki Adım
-            </a>
             <div>
-                <a href="/" class="btn btn-outline-primary me-2">
-                    <i class="fas fa-home me-2"></i>Ana Sayfa
-                </a>
-                <button class="btn btn-success" id="newProject">
-                    <i class="fas fa-plus me-2"></i>Yeni Proje
+                <label class="form-label">Yorumunuz</label>
+                <textarea class="form-textarea" id="feedback" rows="3" 
+                          placeholder="Neleri beğendiniz? Neler iyileştirilebilir?"></textarea>
+                <button class="btn btn-primary mt-2" onclick="submitFeedback()">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Gönder
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- E-posta Modal -->
-<div class="modal fade" id="emailModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">E-posta Gönder</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="emailForm">
-                    <div class="mb-3">
-                        <label for="emailTo" class="form-label">Alıcı E-posta</label>
-                        <input type="email" class="form-control" id="emailTo" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="emailSubject" class="form-label">Konu</label>
-                        <input type="text" class="form-control" id="emailSubject" value="PRP Dosyası">
-                    </div>
-                    <div class="mb-3">
-                        <label for="emailMessage" class="form-label">Mesaj</label>
-                        <textarea class="form-control" id="emailMessage" rows="3">Merhaba,
+<!-- Navigation -->
+<div class="flex justify-between items-center pt-6 border-t border-gray-200">
+    <a href="/generation" class="btn btn-secondary">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Geri
+    </a>
+    
+    <div class="flex gap-3">
+        <a href="/" class="btn btn-secondary">
+            <i class="fas fa-home mr-2"></i>
+            Ana Sayfa
+        </a>
+        <button class="btn btn-primary" onclick="startNewProject()">
+            <i class="fas fa-plus mr-2"></i>
+            Yeni Proje
+        </button>
+    </div>
+</div>
 
-Ekteki PRP dosyasını incelemenizi rica ederim.
+<!-- Email Modal -->
+<div id="emailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg max-w-md w-full">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-lg font-semibold">E-posta ile Paylaş</h3>
+                <button onclick="closeEmailModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <div class="form-group">
+                    <label class="form-label">Alıcı E-posta</label>
+                    <input type="email" class="form-input" id="emailTo" placeholder="ornek@email.com">
+                    </div>
+                <div class="form-group">
+                    <label class="form-label">Konu</label>
+                    <input type="text" class="form-input" id="emailSubject" value="PRP Dosyası - {{ session.project_data.project_name }}">
+                    </div>
+                <div class="form-group">
+                    <label class="form-label">Mesaj</label>
+                    <textarea class="form-textarea" id="emailMessage" rows="4">Merhaba,
+
+{{ session.project_data.project_name }} projesi için hazırlanan PRP dosyasını ekte bulabilirsiniz.
 
 İyi çalışmalar.</textarea>
                     </div>
-                </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                <button type="button" class="btn btn-primary" id="sendEmail">
-                    <i class="fas fa-paper-plane me-2"></i>Gönder
+            <div class="flex justify-end gap-3 p-4 border-t">
+                <button onclick="closeEmailModal()" class="btn btn-secondary">
+                    İptal
+                </button>
+                <button onclick="sendEmail()" class="btn btn-primary">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Gönder
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .prose h1 { font-size: 1.875rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; }
+    .prose h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    .prose h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    .prose p { margin-bottom: 1rem; line-height: 1.75; }
+    .prose ul, .prose ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    .prose li { margin-bottom: 0.5rem; }
+    .prose code { background-color: #f3f4f6; padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-size: 0.875rem; }
+    .prose pre { background-color: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1rem; }
+    .prose pre code { background-color: transparent; padding: 0; }
+    .prose blockquote { border-left: 4px solid #e5e7eb; padding-left: 1rem; margin-bottom: 1rem; font-style: italic; }
+
+    [data-theme="dark"] .prose {
+        color: #f3f4f6;
+    }
+
+    [data-theme="dark"] .prose pre {
+        background-color: #1f2937;
+        color: #e5e7eb;
+    }
+
+    [data-theme="dark"] .prose code {
+        background-color: #374151;
+        color: #fbbf24;
+    }
+
+    [data-theme="dark"] .prose blockquote {
+        border-left-color: #4b5563;
+        color: #d1d5db;
+    }
+
+    [data-theme="dark"] pre.bg-gray-50 {
+        background-color: #1f2937;
+        color: #e5e7eb;
+    }
+
+    [data-theme="dark"] #previewContainer {
+        background-color: #121212;
+        border-color: #374151;
+    }
+
+    [data-theme="dark"] .message {
+        background-color: #1a1a1a;
+        border: 1px solid #374151;
+        color: #f3f4f6;
+    }
+
+    [data-theme="dark"] #previewContainer {
+        background-color: #1a1a1a;
+        border: 1px solid #4b5563;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="dark"] #rawContent pre {
+        background-color: #1f2937;
+        color: #e5e7eb;
+        border: 1px solid #374151;
+    }
+
+    /* Ensure borders are visible in dark mode */
+    [data-theme="dark"] .border-gray-200 {
+        border-color: #374151;
+    }
+
+</style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-$(document).ready(function() {
     let currentContent = '';
+let isRawView = false;
     
+document.addEventListener('DOMContentLoaded', function() {
     // İçerik yükle
     loadContent();
-    
-    // Görünüm değiştirme
-    $('#rawView').click(function() {
-        $('#renderedContent').hide();
-        $('#rawContent').show();
-        $(this).addClass('btn-primary').removeClass('btn-outline-primary');
-        $('#renderedView').addClass('btn-outline-primary').removeClass('btn-primary');
+});
+
+// İçerik yükleme
+function loadContent() {
+    fetch('/api/get-generated-content')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentContent = data.content;
+                updateContentInfo(data.content);
+                
+                // Raw content güncelle
+                const rawElement = document.querySelector('#rawContent pre');
+                if (rawElement) {
+                    rawElement.textContent = data.content;
+                }
+                
+                // Rendered content güncelle
+                if (data.html) {
+                    document.getElementById('renderedContent').innerHTML = `<div class="prose prose-sm max-w-none">${data.html}</div>`;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('İçerik yükleme hatası:', error);
     });
+}
+
+// İçerik bilgilerini güncelle
+function updateContentInfo(content) {
+    const lines = content.split('\n').length;
+    const words = content.split(/\s+/).filter(w => w.length > 0).length;
+    const chars = content.length;
+    const sections = (content.match(/^#+\s/gm) || []).length;
     
-    $('#renderedView').click(function() {
-        $('#rawContent').hide();
-        $('#renderedContent').show();
-        $(this).addClass('btn-primary').removeClass('btn-outline-primary');
-        $('#rawView').addClass('btn-outline-primary').removeClass('btn-primary');
+    document.getElementById('lineCount').textContent = lines.toLocaleString();
+    document.getElementById('wordCount').textContent = words.toLocaleString();
+    document.getElementById('charCount').textContent = chars.toLocaleString();
+    document.getElementById('sectionCount').textContent = sections;
+    document.getElementById('fileSize').textContent = formatBytes(new Blob([content]).size);
+}
+
+// Dosya boyutu formatla
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Görünüm değiştir
+function toggleView() {
+    isRawView = !isRawView;
+    document.getElementById('rawContent').style.display = isRawView ? 'block' : 'none';
+    document.getElementById('renderedContent').style.display = isRawView ? 'none' : 'block';
+    document.getElementById('viewToggleText').textContent = isRawView ? 'Normal Görünüm' : 'Ham Görünüm';
+}
+
+// Önizleme genişlet/daralt
+function expandPreview() {
+    document.getElementById('previewContainer').style.maxHeight = 'none';
+}
+
+function collapsePreview() {
+    document.getElementById('previewContainer').style.maxHeight = '600px';
+}
+
+// İçeriği kopyala
+function copyContent() {
+    navigator.clipboard.writeText(currentContent).then(() => {
+        showAlert('success', 'İçerik panoya kopyalandı!');
+    }).catch(err => {
+        showAlert('error', 'Kopyalama hatası: ' + err);
     });
-    
-    // İndirme butonları
-    $('#downloadMd').click(() => downloadFile('markdown'));
-    $('#downloadTxt').click(() => downloadFile('txt'));
-    $('#downloadJson').click(() => downloadFile('json'));
-    $('#downloadPdf').click(() => downloadFile('pdf'));
-    
-    // Paylaşım butonları
-    $('#copyLink').click(function() {
-        navigator.clipboard.writeText(window.location.href);
-        showAlert('success', 'Link kopyalandı!');
+}
+
+// Dosya indirme
+function downloadFile(format) {
+    fetch('/api/download-file', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ format: format })
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `prp_${Date.now()}.${format === 'markdown' ? 'md' : format}`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        showAlert('success', 'Dosya indiriliyor...');
+    })
+    .catch(error => {
+        showAlert('error', 'İndirme hatası: ' + error);
     });
-    
-    $('#copyContent').click(function() {
-        navigator.clipboard.writeText(currentContent);
-        showAlert('success', 'İçerik kopyalandı!');
-    });
-    
-    $('#shareEmail').click(function() {
-        $('#emailModal').modal('show');
-    });
-    
-    // E-posta gönder
-    $('#sendEmail').click(function() {
+}
+
+// E-posta modal
+function shareEmail() {
+    document.getElementById('emailModal').classList.remove('hidden');
+}
+
+function closeEmailModal() {
+    document.getElementById('emailModal').classList.add('hidden');
+}
+
+function sendEmail() {
         const formData = {
-            to: $('#emailTo').val(),
-            subject: $('#emailSubject').val(),
-            message: $('#emailMessage').val(),
+        to: document.getElementById('emailTo').value,
+        subject: document.getElementById('emailSubject').value,
+        message: document.getElementById('emailMessage').value,
             content: currentContent
         };
+    
+    if (!formData.to) {
+        showAlert('error', 'Lütfen alıcı e-posta adresini girin.');
+        return;
+    }
         
         fetch('/api/send-email', {
             method: 'POST',
@@ -285,28 +464,28 @@ $(document).ready(function() {
         .then(data => {
             if (data.success) {
                 showAlert('success', 'E-posta başarıyla gönderildi!');
-                $('#emailModal').modal('hide');
+            closeEmailModal();
             } else {
-                showAlert('danger', 'E-posta gönderme hatası: ' + data.error);
+            showAlert('error', 'E-posta gönderme hatası: ' + data.error);
             }
         })
         .catch(error => {
-            showAlert('danger', 'E-posta gönderme hatası: ' + error);
-        });
+        showAlert('error', 'E-posta gönderme hatası: ' + error);
     });
+}
     
     // Geri bildirim gönder
-    $('#submitFeedback').click(function() {
-        const quality = $('input[name="quality"]:checked').val();
-        const feedback = $('#feedback').val();
+function submitFeedback() {
+    const quality = document.querySelector('input[name="quality"]:checked');
+    const feedback = document.getElementById('feedback').value;
         
         if (!quality) {
-            showAlert('warning', 'Lütfen kalite değerlendirmesi yapın.');
+        showAlert('error', 'Lütfen kalite değerlendirmesi yapın.');
             return;
         }
         
         const feedbackData = {
-            quality: parseInt(quality),
+        quality: parseInt(quality.value),
             feedback: feedback
         };
         
@@ -320,20 +499,20 @@ $(document).ready(function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showAlert('success', 'Geri bildiriminiz kaydedildi. Teşekkürler!');
-                $('#feedback').val('');
-                $('input[name="quality"]').prop('checked', false);
+            showAlert('success', 'Geri bildiriminiz için teşekkürler!');
+            document.getElementById('feedback').value = '';
+            document.querySelectorAll('input[name="quality"]').forEach(input => input.checked = false);
             } else {
-                showAlert('danger', 'Geri bildirim gönderme hatası: ' + data.error);
+            showAlert('error', 'Geri bildirim gönderme hatası: ' + data.error);
             }
         })
         .catch(error => {
-            showAlert('danger', 'Geri bildirim gönderme hatası: ' + error);
-        });
+        showAlert('error', 'Geri bildirim gönderme hatası: ' + error);
     });
+}
     
-    // Yeni proje
-    $('#newProject').click(function() {
+// Yeni proje başlat
+function startNewProject() {
         if (confirm('Yeni proje başlatmak istediğinizden emin misiniz? Mevcut veriler silinecek.')) {
             fetch('/api/clear-session', {
                 method: 'POST'
@@ -342,84 +521,12 @@ $(document).ready(function() {
                 window.location.href = '/';
             });
         }
-    });
-    
-    // İçerik yükleme fonksiyonu
-    function loadContent() {
-        fetch('/api/get-generated-content')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    currentContent = data.content;
-                    updateContentInfo(data.content);
-                    $('#rawCode').text(data.content);
-                    
-                    // Markdown render
-                    if (data.html) {
-                        $('#markdownContent').html(data.html);
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('İçerik yükleme hatası:', error);
-            });
-    }
-    
-    // İçerik bilgilerini güncelle
-    function updateContentInfo(content) {
-        const lines = content.split('\n').length;
-        const words = content.split(/\s+/).length;
-        const chars = content.length;
-        const sections = (content.match(/^#/gm) || []).length;
-        
-        $('#lineCount').text(lines);
-        $('#wordCount').text(words);
-        $('#charCount').text(chars);
-        $('#sectionCount').text(sections);
-        $('#fileSize').text(formatBytes(chars));
-    }
-    
-    // Dosya boyutu formatla
-    function formatBytes(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-    
-    // Dosya indirme
-    function downloadFile(format) {
-        const btn = event.target;
-        const originalText = btn.innerHTML;
-        
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>İndiriliyor...';
-        btn.disabled = true;
-        
-        fetch('/api/download-file', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ format: format })
-        })
-        .then(response => response.blob())
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `prp_${Date.now()}.${format === 'markdown' ? 'md' : format}`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-            
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        })
-        .catch(error => {
-            showAlert('danger', 'İndirme hatası: ' + error);
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        });
+}
+
+// ESC tuşu ile modal kapat
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeEmailModal();
     }
 });
 </script>
